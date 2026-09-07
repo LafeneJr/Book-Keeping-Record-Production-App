@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book Keeping Record</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Poppins:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>    
+    :root {
+      --sidebar-bg: #1e2a3a;
+      --topbar-bg: #ffffff;
+      --primary: #2c5aa0;
+      --primary-light: #e8eff9;
+      --secondary: #3a7bd5;
+      --accent: #00b894;
+      --text-dark: #2d3748;
+      --text-light: #f7fafc;
+      --border-color: #e2e8f0;
+      --card-bg: #ffffff;
+      --hover-bg: #1e4a8f;
+      --active-nav-color: #3a7bd5;
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --danger: #e17055;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f7fa;
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Sidebar Styles */
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar-bg);
+      color: var(--text-light);
+      transition: var(--transition);
+      height: 100vh;
+      position: fixed;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+      z-index: 1000;
+      transform: translateX(0);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    
+    .sidebar::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .sidebar.collapsed {
+      width: 80px;
+      transform: translateX(0);
+    }
+    
+    .app-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 1.4rem;
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      display: flex;
+      align-items: center;
+      transition: var(--transition);
+    }
+    
+    .app-title i {
+      margin-right: 12px;
+      color: var(--accent);
+      transition: var(--transition);
+    }
+    
+    .sidebar.collapsed .app-title span {
+      display: none;
+    }
+    
+    .sidebar.collapsed .app-title i {
+      margin-right: 0;
+    }
+    
+    .nav {
+      padding: 15px 0;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      transition: var(--transition);
+      border-left: 4px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+    
+    .nav-item:hover::before {
+      left: 100%;
+    }
+    
+    .nav-item:hover {
+      background: var(--hover-bg);
+      border-left: 4px solid var(--accent);
+      color: white;
+      transform: translateX(5px);
+    }
+
+    /* Active navigation item styling */
+    .nav-item.active {
+      background: var(--active-nav-color);
+      border-left: 4px solid var(--accent);
+      color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-item i {
+      width: 24px;
+      margin-right: 12px;
+      text-align: center;
+      transition: var(--transition);
+    }
+    
+    .sidebar.collapsed .nav-item span {
+      display: none;
+    }
+    
+    .sidebar.collapsed .nav-item i {
+      margin-right: 0;
+      font-size: 1.2rem;
+    }
+    
+    /* Toggle Button */
+    .sidebar-toggle {
+      position: absolute;
+      top: 20px;
+      right: -0px;
+      width: 25px;
+      height: 25px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      z-index: 1001;
+    }
+    
+    .sidebar-toggle:hover {
+      transform: scale(1.1);
+      background: var(--hover-bg);
+    }
+    
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+      min-width: 0;
+    }
+    
+    .sidebar.collapsed + .main-content {
+      margin-left: 80px;
+    }
+    
+    /* Top Bar Styles */
+    .top-bar {
+      background: var(--topbar-bg);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      transition: var(--transition);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    
+    .page-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 1.5rem;
+      color: var(--text-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .top-bar-links {
+      display: flex;
+      gap: 15px;
+      flex-shrink: 0;
+    }
+    
+    .top-bar-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      text-align: center;
+      color: var(--primary);
+      transition: var(--transition);
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .top-bar-links a:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--danger);
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #logout-link:hover {
+      background: linear-gradient(90deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.3));
+      border-left: 4px solid #e74c3c;
+      transform: translateX(5px);
+    }
+
+    #logout-link.logout-processing {
+      background: linear-gradient(90deg, rgba(243, 156, 18, 0.1), rgba(243, 156, 18, 0.3));
+      border-left: 4px solid #f39c12;
+    }
+
+    /* Spinner animation for logout */
+    @keyframes logout-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .logout-spinner {
+      animation: logout-spin 1s linear infinite;
+      display: inline-block;
+    }
+    
+    /* Smooth transitions for logout elements */
+    #logout-link i, #logout-link span {
+      transition: all 0.3s ease;
+    }
+
+    /* Content Area */
+    .content {
+      padding: 30px;
+      flex: 1;
+      animation: fadeIn 0.5s ease-out;
+      overflow-x: auto;
+      overflow-y: visible;
+      min-width: 0;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Floating Action Button */
+    .fab {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      transition: var(--transition);
+      z-index: 999;
+    }
+    
+    .fab:hover {
+      transform: scale(1.1) rotate(90deg);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 80px;
+        transform: translateX(0);
+      }
+      
+      .sidebar:not(.collapsed) {
+        width: 260px;
+      }
+      
+      .main-content {
+        margin-left: 80px;
+      }
+      
+      .sidebar:not(.collapsed) + .main-content {
+        margin-left: 260px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .sidebar {
+        width: 0;
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.collapsed {
+        width: 0;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .sidebar-toggle {
+        display: none;
+      }
+      
+      .top-bar {
+        padding: 15px;
+      }
+      
+      .content {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-toggle" id="sidebarToggle">
+      <i class="fas fa-chevron-left"></i>
+    </div>
+    
+    <h1 class="app-title"><i class="fas fa-book"></i> <span>Book Keeping Record</span></h1>
+        
+    <nav class="nav">
+      <? if (userData.menus) { ?>
+        <? userData.menus.forEach(function(menu) { ?>
+          <? 
+            const pageMap = {
+              'dashboard': 'dashboard',
+              'inventory': 'inventory', 
+              'suppliers': 'suppliers',
+              'customers': 'customers',
+              'purchases': 'purchases',
+              'sales': 'sales',
+              'productions': 'productions',
+              'payments': 'payments',
+              'users': 'users',
+              'settings': 'settings'
+            };
+            
+            const pageName = pageMap[menu.URL] || menu.URL;
+          ?>
+          
+          <a href="<?= getScriptUrl() ?>?page=<?= pageName ?>&token=<?= token ?>" 
+            class="nav-item <?= currentPage === pageName ? 'active' : '' ?>">
+            <i class="fas <?= menu.Icon || 'fa-circle' ?>"></i> 
+            <span><?= menu.MenuName || menu.URL ?></span>
+          </a>
+        <? }); ?>
+      <? } ?>
+      
+      <!-- Profile and Logout are always visible -->
+      <a href="<?= getScriptUrl() ?>?page=profile&token=<?= token ?>" class="nav-item <?= currentPage === 'profile' ? 'active' : '' ?>">
+        <i class="fas fa-user"></i> <span>My Profile</span>
+      </a>
+      
+      <a href="<?= getScriptUrl() ?>?page=logout&token=<?= token ?>" class="nav-item" id="logout-link">
+        <i class="fas fa-sign-out-alt"></i> <span id="logout-text">Logout</span>
+        <i class="fas fa-spinner fa-spin" id="logout-spinner" style="display: none; margin-left: 8px;"></i>
+      </a>
+    </nav>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <h1 class="page-title" id="pageTitle">
+        <? if (currentPage === 'dashboard') { ?>Dashboard<? } ?>
+        <? if (currentPage === 'inventory') { ?>Inventory Management<? } ?>
+        <? if (currentPage === 'suppliers') { ?>Suppliers<? } ?>
+        <? if (currentPage === 'customers') { ?>Customers<? } ?>
+        <? if (currentPage === 'purchases') { ?>Purchase Records<? } ?>
+        <? if (currentPage === 'sales') { ?>Sales Records<? } ?>
+        <? if (currentPage === 'productions') { ?>Productions<? } ?>
+        <? if (currentPage === 'payments') { ?>Payments<? } ?>
+        <? if (currentPage === 'users') { ?>User Management<? } ?>
+        <? if (currentPage === 'settings') { ?>Settings<? } ?>
+        <? if (currentPage === 'profile') { ?>My Profile<? } ?>
+      </h1>
+      <div class="top-bar-links">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <!-- Profile Image or Icon -->
+          <? if (userData.profileImage && userData.profileImage !== '') { ?>
+            <a href="<?= getScriptUrl() ?>?page=profile&token=<?= token ?>" style="display: block; text-decoration: none;">
+              <img src="<?= userData.profileImage ?>?t=<?= new Date().getTime() ?>" 
+                  style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); cursor: pointer;">
+            </a>
+          <? } else { ?>
+            <a href="<?= getScriptUrl() ?>?page=profile&token=<?= token ?>" 
+              style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: var(--primary); text-decoration: none;">
+              <i class="fas fa-user" style="color: white; font-size: 18px;"></i>
+            </a>
+          <? } ?>
+          
+          <!-- User Info -->
+          <div style="display: flex; flex-direction: column;">
+            <span style="color: var(--text-dark); font-weight: 500; font-size: 0.95rem;">
+              <?= userData.userFirstName ?> <?= userData.userLastName ?>
+            </span>
+            <span style="color: var(--text-dark); font-weight: 300; font-size: 0.8rem;">
+              <?= userData.userRole ?>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Make permissions available globally - DYNAMIC for current page
+      window.appPermissions = {
+        token: '<?= token ?>',
+        currentPage: '<?= currentPage ?>',
+        currentUser: {
+          id: '<?= userData.userId ?>',
+          email: '<?= userData.userEmail ?>',
+          name: '<?= userData.userFirstName ?> <?= userData.userLastName ?>',
+          role: '<?= userData.userRole ?>'
+        }
+      };
+      
+      // Set current page permissions dynamically
+      window.appPermissions[window.appPermissions.currentPage] = {
+        canView: <?= canView ? 'true' : 'false' ?>,
+        canAdd: <?= canAdd ? 'true' : 'false' ?>,
+        canEdit: <?= canEdit ? 'true' : 'false' ?>,
+        canDelete: <?= canDelete ? 'true' : 'false' ?>
+      };
+      
+      //console.log('Global permissions set:', window.appPermissions);
+    </script>
+    
+    <!-- Dynamic Content Injection -->
+    <div class="content">
+      <?!= include(contentTemplate + '.html') ?>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('sidebar');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const logoutLink = document.getElementById('logout-link');
+      
+      // Sidebar toggle
+      sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+        const icon = sidebarToggle.querySelector('i');
+        
+        if (sidebar.classList.contains('collapsed')) {
+          icon.classList.remove('fa-chevron-left');
+          icon.classList.add('fa-chevron-right');
+        } else {
+          icon.classList.remove('fa-chevron-right');
+          icon.classList.add('fa-chevron-left');
+        }
+      });
+      
+      // Logout functionality
+      if (logoutLink) {
+        logoutLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Get elements
+          const logoutIcon = this.querySelector('.fa-sign-out-alt');
+          const logoutSpinner = document.getElementById('logout-spinner');
+          const logoutText = document.getElementById('logout-text');
+          
+          if (!logoutSpinner || !logoutText) {
+            console.error('Logout elements not found');
+            // Fallback: redirect directly
+            window.location.href = this.getAttribute('href');
+            return;
+          }
+          
+          // Save original states
+          const originalText = logoutText.textContent;
+          const originalIconDisplay = logoutIcon.style.display;
+          
+          // Show spinner, hide icon and change text
+          logoutSpinner.style.display = 'inline-block';
+          logoutIcon.style.display = 'none';
+          logoutText.textContent = 'Logging out...';
+          
+          // Add processing class for styling
+          this.classList.add('logout-processing');
+          
+          // Disable the link to prevent multiple clicks
+          this.style.pointerEvents = 'none';
+          this.style.opacity = '0.7';
+          
+          // Get token
+          const urlParams = new URLSearchParams(window.location.search);
+          const token = urlParams.get('token');
+          
+          // Function to reset logout UI (in case of failure)
+          function resetLogoutUI() {
+            if (logoutSpinner) logoutSpinner.style.display = 'none';
+            if (logoutIcon) logoutIcon.style.display = originalIconDisplay;
+            if (logoutText) logoutText.textContent = originalText;
+            if (logoutLink) {
+              logoutLink.classList.remove('logout-processing');
+              logoutLink.style.pointerEvents = 'auto';
+              logoutLink.style.opacity = '1';
+            }
+          }
+          
+          // Unified function to perform logout and redirect
+          function performLogoutRedirect() {
+            // Clear ALL storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear cookies
+            document.cookie.split(";").forEach(function(c) {
+              document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            // Get login URL - using replace to prevent back button issues
+            const loginUrl = '<?= getScriptUrl() ?>?page=login';
+            
+            // Use replace() to prevent back button from returning to protected page
+            window.location.replace(loginUrl);
+          }
+          
+          // Add a timeout as fallback in case the server doesn't respond
+          const timeoutId = setTimeout(() => {
+            console.warn('Logout taking too long, forcing redirect...');
+            performLogoutRedirect();
+          }, 10000); // 10 second timeout
+          
+          if (token) {
+            console.log('Attempting server logout with token:', token);
+            
+            // Call server to logout
+            google.script.run
+              .withSuccessHandler(function(response) {
+                console.log('Server logout successful:', response);
+                clearTimeout(timeoutId);
+                performLogoutRedirect();
+              })
+              .withFailureHandler(function(error) {
+                console.error('Server logout failed:', error);
+                clearTimeout(timeoutId);
+                
+                // Reset UI
+                resetLogoutUI();
+                
+                // Show error message but still logout locally
+                const errorMessage = error && error.message ? error.message : 'Server logout failed, but logging out locally...';
+                alert(errorMessage);
+                
+                // Still perform local logout after a brief delay
+                setTimeout(performLogoutRedirect, 1000);
+              })
+              .logout(token);
+          } else {
+            console.log('No token found, performing local logout only');
+            clearTimeout(timeoutId);
+            
+            // Just redirect to login after showing spinner for a moment
+            setTimeout(performLogoutRedirect, 500);
+          }
+        });
+      }
+      
+      // Store token in localStorage for later use
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      if (token) {
+        localStorage.setItem('sessionToken', token);
+      }
+    });
+
+    // Function to update top bar profile image
+      function updateTopBarProfileImage() {
+        const userImage = '<?= userData.profileImage ?>';
+        const topBarLinks = document.querySelector('.top-bar-links');
+        
+        if (userImage && userImage !== '') {
+          // Update the image in top bar
+          const imgElement = topBarLinks.querySelector('img');
+          if (imgElement) {
+            imgElement.src = userImage;
+          } else {
+            // Replace icon with image
+            const iconElement = topBarLinks.querySelector('.fa-user');
+            if (iconElement) {
+              const img = document.createElement('img');
+              img.src = userImage;
+              img.style.cssText = 'width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);';
+              iconElement.parentNode.replaceChild(img, iconElement);
+            }
+          }
+        }
+      }
+
+      // Update profile image when page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        updateTopBarProfileImage();
+        
+        // Also update when navigating to profile page
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+          if (item.getAttribute('href')?.includes('page=profile')) {
+            item.addEventListener('click', function() {
+              setTimeout(updateTopBarProfileImage, 1000);
+            });
+          }
+        });
+      });
+
+      // Add this function to Template.html
+      function updateProfileImage(newImageUrl) {
+        //console.log('Template updating profile image:', newImageUrl);
+        
+        // Update the top bar image if it exists
+        const topBarLinks = document.querySelector('.top-bar-links');
+        if (topBarLinks) {
+          const img = topBarLinks.querySelector('img');
+          const profileLink = topBarLinks.querySelector('a[href*="page=profile"]');
+          
+          if (img) {
+            // Update existing image
+            img.src = newImageUrl;
+          } else if (profileLink) {
+            // Check if it contains an icon or needs an image
+            const icon = profileLink.querySelector('.fa-user');
+            if (icon) {
+              // Replace icon with image
+              const newImg = document.createElement('img');
+              newImg.src = newImageUrl;
+              newImg.style.cssText = 'width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); cursor: pointer;';
+              profileLink.innerHTML = '';
+              profileLink.appendChild(newImg);
+            }
+          }
+        }
+        
+        // Also update sidebar if it has a profile image
+        const sidebarProfileImg = document.querySelector('.sidebar .nav-item[href*="page=profile"] img');
+        if (sidebarProfileImg) {
+          sidebarProfileImg.src = newImageUrl;
+        }
+      }
+
+      // Check for profile image updates when navigating
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check localStorage for recent profile image updates
+        const lastUpdate = localStorage.getItem('lastProfileImageUpdate');
+        if (lastUpdate) {
+          try {
+            const updateData = JSON.parse(lastUpdate);
+            // Only apply if update was less than 5 minutes ago
+            if (Date.now() - updateData.timestamp < 300000) {
+              updateProfileImage(updateData.url);
+            }
+            // Clear after applying
+            localStorage.removeItem('lastProfileImageUpdate');
+          } catch (e) {
+            console.error('Error parsing profile update:', e);
+          }
+        }
+      });
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inventory Items</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Poppins:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Select2 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+  
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+    }
+    
+    .inventory-container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    
+    /* KEEP ALL YOUR EXISTING STYLES EXACTLY AS THEY WERE */
+    /* ... your existing CSS code ... */
+    
+    .inventory-header {
+      margin-bottom: 25px;
+      flex-shrink: 0;
+    }
+    
+    .inventory-header h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .inventory-header p {
+      color: #7f8c8d;
+      font-size: 1.05rem;
+    }
+    
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    
+    .btn-primary {
+      background-color: #1abc9c;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #16a085;
+    }
+    
+    .btn-secondary {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #2980b9;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #bdc3c7;
+      color: #34495e;
+    }
+    
+    .btn-outline:hover {
+      background-color: #ecf0f1;
+    }
+    
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+    
+    .search-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    
+    .search-select {
+      padding: 9px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      background-color: white;
+      flex-shrink: 0;
+    }
+    
+    .search-input {
+      padding: 10px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      width: 250px;
+      flex-shrink: 0;
+    }
+    
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+    
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1400px;
+    }
+    
+    .inventory-table th {
+      background-color: #2c3e50;
+      color: white;
+      padding: 12px 15px;
+      text-align: left;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .inventory-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ecf0f1;
+      color: #34495e;
+    }
+    
+    .inventory-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .inventory-table .low-stock {
+      background-color: rgba(243, 156, 18, 0.1);
+    }
+    
+    .inventory-table .reorder-needed {
+      background-color: rgba(231, 76, 60, 0.1);
+    }
+    
+    .action-cell {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    
+    .action-btn {
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    
+    .edit-btn {
+      background-color: #3498db;
+      color: white;
+      border: none;
+    }
+    
+    .update-btn {
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+    }
+    
+    .cancel-btn {
+      background-color: #95a5a6;
+      color: white;
+      border: none;
+    }
+    
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+    }
+    
+    .editable {
+      background-color: #fffde7;
+      border: 1px solid #ffd54f;
+      padding: 5px;
+      border-radius: 3px;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      overflow-y: auto;
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 25px;
+      border-radius: 8px;
+      width: 450px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .modal-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      color: #2c3e50;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    
+    .close-btn {
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #7f8c8d;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    .form-control:focus {
+      border-color: #1abc9c;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+    }
+    
+    .required:after {
+      content: " *";
+      color: #e74c3c;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .processing-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255,255,255,0.8);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #1abc9c;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .select2-container {
+      width: 100% !important;
+    }
+    
+    .id-generate {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .id-field {
+      flex: 1;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 5px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    .page-btn {
+      padding: 8px 12px;
+      background-color: white;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    
+    .page-btn.active {
+      background-color: #1abc9c;
+      color: white;
+      border-color: #1abc9c;
+    }
+    
+    .reorder-flag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .reorder-yes {
+      background-color: rgba(231, 76, 60, 0.15);
+      color: #e74c3c;
+    }
+    
+    .reorder-no {
+      background-color: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .input-group .form-control {
+      flex: 1;
+    }
+    
+    .quick-add-btn {
+      background-color: #f39c12;
+      color: white;
+      border: none;
+      padding: 10px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+    
+    .quick-add-btn:hover {
+      background-color: #e67e22;
+    }
+    
+    /* PERMISSION-RELATED STYLES */
+    .btn-disabled {
+      background-color: #bdc3c7;
+      color: #7f8c8d;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    .btn-disabled:hover {
+      background-color: #bdc3c7;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .action-btn-disabled {
+      background-color: #bdc3c7;
+      color: #7f8c8d;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    .action-btn-disabled:hover {
+      background-color: #bdc3c7;
+    }
+  </style>
+</head>
+<body>  
+  <div class="inventory-container">
+    <!-- Header Section -->
+    <div class="inventory-header">
+      <h1>Inventory Items</h1>
+      <p>Add and manage your inventory items</p>
+    </div>
+    
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <div class="btn-group">
+        <!-- ADD BUTTON: Will be shown/hidden by JavaScript -->
+        <button id="addInventoryBtn" class="btn btn-primary">
+          <i class="fas fa-box"></i> Add Inventory Item
+        </button>
+      </div>
+      
+      <div class="search-group">
+        <select id="searchCriteria" class="search-select">
+          <option value="all">All</option>
+          <option value="Item Type">Item Type</option>
+          <option value="Item Category">Item Category</option>
+          <option value="Item Name">Item Name</option>
+          <option value="Reorder Required">Reorder Required</option>
+        </select>
+        <select id="inventoryTypeFilter" class="search-select">
+          <option value="all">All Inventory</option>
+          <option value="raw">Raw Materials</option>
+          <option value="produced">Produced Items</option>
+        </select>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search...">
+        <button id="searchBtn" class="btn btn-outline">
+          <i class="fas fa-search"></i> Search
+        </button>
+        <button id="clearSearchBtn" class="btn btn-outline">
+          <i class="fas fa-times"></i> Clear
+        </button>
+      </div>
+    </div>
+    
+    <!-- Inventory Table Container -->
+    <div id="tableContainer">
+      <div class="table-container">
+        <table class="inventory-table">
+          <thead>
+            <tr>
+              <th width="5%">Item ID</th>
+              <th width="12%">Item Type</th>
+              <th width="12%">Item Category</th>
+              <th width="20%">Item Name</th>
+              <th width="8%">Qty Purchased</th>
+              <th width="8%">Qty Used</th>
+              <th width="8%">Product Qty</th>
+              <th width="8%">Qty Sold</th>
+              <th width="8%">Remaining Qty</th>
+              <th width="5%">Reorder Level</th>
+              <th width="5%">Reorder Required</th>
+              <th width="7%">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="pagination" id="pagination">
+        <!-- Pagination buttons will be added here -->
+      </div>
+    </div>
+    
+    <!-- No Data Message -->
+    <div id="noData" style="display:none; text-align:center; padding:40px; background:white; border-radius:8px;">
+      <i class="fas fa-inbox" style="font-size:3rem; color:#bdc3c7; margin-bottom:20px;"></i>
+      <h3 style="color:#7f8c8d;">No inventory items found</h3>
+      <p>Click "Add Inventory Item" to add your first item</p>
+    </div>
+  </div>
+  
+  <!-- New Inventory Item Modal -->
+  <div id="inventoryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add New Inventory Item</h2>
+        <span class="close-btn" id="closeInventoryModalBtn">&times;</span>
+      </div>
+      <div class="form-group">
+        <label class="required">Item ID</label>
+        <div class="id-generate">
+          <input type="text" id="inventoryId" class="form-control id-field" readonly>
+          <button class="btn btn-secondary" id="generateIdBtn">Generate</button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Item Type</label>
+        <div class="input-group">
+          <select id="itemType" class="form-control" style="width:100%"></select>
+          <button type="button" class="quick-add-btn" id="quickAddTypeBtn">+ Add New</button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Item Category</label>
+        <div class="input-group">
+          <select id="itemCategory" class="form-control" style="width:100%"></select>
+          <button type="button" class="quick-add-btn" id="quickAddCategoryBtn">+ Add New</button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Item Name</label>
+        <div id="itemNameContainer">
+          <!-- Default will be text input, will be changed dynamically -->
+          <input type="text" id="itemName" class="form-control" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Reorder Level</label>
+        <input type="number" id="reorderLevel" class="form-control" min="0" required>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelInventoryModalBtn">Close</button>
+        <button class="btn btn-primary" id="saveInventoryItemBtn">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Quick Add Type Modal -->
+  <div id="quickAddTypeModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add New Item Type</h2>
+        <span class="close-btn" id="closeQuickAddTypeModalBtn">&times;</span>
+      </div>
+      <div class="form-group">
+        <label class="required">New Item Type</label>
+        <input type="text" id="quickAddType" class="form-control" placeholder="Enter new item type">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelQuickAddTypeBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveQuickAddTypeBtn">Save & Select</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Quick Add Category Modal -->
+  <div id="quickAddCategoryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add New Item Category</h2>
+        <span class="close-btn" id="closeQuickAddCategoryModalBtn">&times;</span>
+      </div>
+      <div class="form-group">
+        <label class="required">New Item Category</label>
+        <input type="text" id="quickAddCategory" class="form-control" placeholder="Enter new item category">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelQuickAddCategoryBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveQuickAddCategoryBtn">Save & Select</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Processing Overlay -->
+  <div id="processingOverlay" class="processing-overlay">
+    <div class="spinner"></div>
+    <p>Processing...</p>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script>
+    // ===========================================
+    // GLOBAL VARIABLES (NO DUPLICATES)
+    // ===========================================
+    let currentPage = 1;
+    const pageSize = 25;
+    let allItems = [];
+    let filteredItems = [];
+    let types = [];
+    let categories = [];
+    let itemNames = [];
+    
+    // Get permissions from window object (not redeclaring)
+    const inventoryPermissions = window.appPermissions?.inventory || {
+      canView: true,
+      canAdd: true,
+      canEdit: true,
+      canDelete: true
+    };
+    
+    const sessionToken = window.appPermissions?.token || '';
+    
+    //console.log('Inventory Permissions:', inventoryPermissions);
+    //console.log('Session Token:', sessionToken ? 'Available' : 'Missing');
+    
+    // ===========================================
+    // EVENT LISTENERS (NOT INLINE ONCLICK)
+    // ===========================================
+    document.addEventListener('DOMContentLoaded', function() {
+      //console.log('Inventory page initializing...');
+      
+      // Setup event listeners
+      setupEventListeners();
+      
+      // Setup page based on permissions
+      setupPage();
+      
+      // Initialize dropdowns
+      $('#itemType').select2({
+        tags: false,
+        placeholder: "Select item type",
+        allowClear: true
+      });
+      
+      $('#itemCategory').select2({
+        tags: false,
+        placeholder: "Select item category",
+        allowClear: true
+      });
+    });
+    
+    function setupEventListeners() {
+      // Add Inventory Button
+      document.getElementById('addInventoryBtn').addEventListener('click', openNewItemModal);
+      
+      // Search Buttons
+      document.getElementById('searchBtn').addEventListener('click', searchItems);
+      document.getElementById('clearSearchBtn').addEventListener('click', clearSearch);
+      
+      // Modal Buttons
+      document.getElementById('closeInventoryModalBtn').addEventListener('click', closeInventoryModal);
+      document.getElementById('cancelInventoryModalBtn').addEventListener('click', closeInventoryModal);
+      document.getElementById('generateIdBtn').addEventListener('click', generateInventoryId);
+      document.getElementById('saveInventoryItemBtn').addEventListener('click', saveNewInventoryItem);
+      
+      // Quick Add Type Buttons
+      document.getElementById('quickAddTypeBtn').addEventListener('click', openQuickAddType);
+      document.getElementById('closeQuickAddTypeModalBtn').addEventListener('click', closeQuickAddTypeModal);
+      document.getElementById('cancelQuickAddTypeBtn').addEventListener('click', closeQuickAddTypeModal);
+      document.getElementById('saveQuickAddTypeBtn').addEventListener('click', saveQuickAddType);
+      
+      // Quick Add Category Buttons
+      document.getElementById('quickAddCategoryBtn').addEventListener('click', openQuickAddCategory);
+      document.getElementById('closeQuickAddCategoryModalBtn').addEventListener('click', closeQuickAddCategoryModal);
+      document.getElementById('cancelQuickAddCategoryBtn').addEventListener('click', closeQuickAddCategoryModal);
+      document.getElementById('saveQuickAddCategoryBtn').addEventListener('click', saveQuickAddCategory);
+    }
+    
+    // ===========================================
+    // PAGE SETUP FUNCTION
+    // ===========================================
+    function setupPage() {
+      //console.log('Setting up page with permissions:', inventoryPermissions);
+      
+      // Show/hide add button based on permissions
+      const addBtn = document.getElementById('addInventoryBtn');
+      if (inventoryPermissions.canAdd === true || inventoryPermissions.canAdd === 'true') {
+          addBtn.style.display = 'flex';
+      } else {
+          addBtn.style.display = 'none';
+      }
+      
+      // Only load data if user has view permission
+      if (inventoryPermissions.canView) {
+        loadTypes();
+        loadCategories();
+        loadItemNames();
+        loadInventoryItems();
+      } else {
+        // Show access denied
+        document.getElementById('tableContainer').style.display = 'none';
+        document.getElementById('noData').style.display = 'block';
+        document.getElementById('noData').innerHTML = `
+          <i class="fas fa-ban" style="font-size:3rem; color:#e74c3c; margin-bottom:20px;"></i>
+          <h3 style="color:#e74c3c;">Access Denied</h3>
+          <p>You don't have permission to view inventory items.</p>
+        `;
+      }
+    }
+    
+    // ===========================================
+    // CORE FUNCTIONS (NOW IN GLOBAL SCOPE)
+    // ===========================================
+    
+    // Open new inventory item modal
+    function openNewItemModal() {
+      // Check permission
+      if (!inventoryPermissions.canAdd) {
+        alert('You do not have permission to add inventory items');
+        return;
+      }
+      
+      document.getElementById('inventoryModal').style.display = 'block';
+      document.getElementById('inventoryId').value = '';
+      document.getElementById('reorderLevel').value = '';
+      $('#itemType').val(null).trigger('change');
+      $('#itemCategory').val(null).trigger('change');
+      
+      const container = document.getElementById('itemNameContainer');
+      container.innerHTML = '<input type="text" id="itemName" class="form-control" required>';
+    }
+    
+    // Close new inventory item modal
+    function closeInventoryModal() {
+      document.getElementById('inventoryModal').style.display = 'none';
+    }
+    
+    // Open quick add type modal
+    function openQuickAddType() {
+      // Check add permission
+      if (!inventoryPermissions.canAdd) {
+        alert('You do not have permission to add new types');
+        return;
+      }
+      
+      document.getElementById('quickAddTypeModal').style.display = 'block';
+      document.getElementById('quickAddType').value = '';
+      document.getElementById('quickAddType').focus();
+    }
+    
+    // Close quick add type modal
+    function closeQuickAddTypeModal() {
+      document.getElementById('quickAddTypeModal').style.display = 'none';
+    }
+    
+    // Open quick add category modal
+    function openQuickAddCategory() {
+      // Check add permission
+      if (!inventoryPermissions.canAdd) {
+        alert('You do not have permission to add new categories');
+        return;
+      }
+      
+      document.getElementById('quickAddCategoryModal').style.display = 'block';
+      document.getElementById('quickAddCategory').value = '';
+      document.getElementById('quickAddCategory').focus();
+    }
+    
+    // Close quick add category modal
+    function closeQuickAddCategoryModal() {
+      document.getElementById('quickAddCategoryModal').style.display = 'none';
+    }
+    
+    // ===========================================
+    // DATA LOADING FUNCTIONS
+    // ===========================================
+    
+    function loadTypes() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          types = result;
+          populateTypeDropdown();
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading types:', error);
+          showError('Error loading types: ' + error.message);
+        })
+        .itemGetTypes(sessionToken);
+    }
+    
+    function loadCategories() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          categories = result;
+          populateCategoryDropdown();
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading categories:', error);
+          showError('Error loading categories: ' + error.message);
+        })
+        .itemGetCategories(sessionToken);
+    }
+    
+    function loadItemNames() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          itemNames = result;
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading item names:', error);
+        })
+        .itemGetNames(sessionToken);
+    }
+    
+    function loadInventoryItems() {
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          allItems = result;
+          filteredItems = [...result];
+          renderItemTable();
+          hideProcessing();
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading inventory items:', error);
+          showError('Error loading inventory: ' + error.message);
+          allItems = [];
+          filteredItems = [];
+          renderItemTable();
+          hideProcessing();
+        })
+        .itemGetInventoryItems(sessionToken);
+    }
+    
+    // ===========================================
+    // RENDERING FUNCTIONS
+    // ===========================================
+    
+    function populateTypeDropdown() {
+      const typeSelect = $('#itemType');
+      typeSelect.empty();
+      typeSelect.append(new Option('', ''));
+      
+      types.forEach(type => {
+        if (type) {
+          typeSelect.append(new Option(type, type));
+        }
+      });
+      
+      typeSelect.trigger('change');
+    }
+    
+    function populateCategoryDropdown() {
+      const categorySelect = $('#itemCategory');
+      categorySelect.empty();
+      categorySelect.append(new Option('', ''));
+      
+      categories.forEach(category => {
+        if (category) {
+          categorySelect.append(new Option(category, category));
+        }
+      });
+      
+      categorySelect.trigger('change');
+    }
+    
+    function renderItemTable() {
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const pageItems = filteredItems.slice(startIndex, endIndex);
+      const tableBody = document.getElementById('tableBody');
+      
+      tableBody.innerHTML = '';
+      
+      if (pageItems.length === 0) {
+        document.getElementById('tableContainer').style.display = 'none';
+        document.getElementById('noData').style.display = 'block';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+      
+      document.getElementById('tableContainer').style.display = 'block';
+      document.getElementById('noData').style.display = 'none';
+      
+      pageItems.forEach((item, index) => {
+        const row = document.createElement('tr');
+        
+        // Add class for low stock or reorder needed
+        if (item.remainingQty < item.reorderLevel) {
+          row.classList.add('reorder-needed');
+        } else if (item.remainingQty < item.reorderLevel * 1.5) {
+          row.classList.add('low-stock');
+        }
+        
+        // Create action buttons based on permissions
+        let actionButtons = '';
+        
+        if (inventoryPermissions.canEdit) {
+          actionButtons += `
+            <button class="action-btn edit-btn" onclick="editItem(${index})" title="Edit Item">
+              <i class="fas fa-edit"></i>
+            </button>`;
+        }
+        
+        if (inventoryPermissions.canDelete) {
+          actionButtons += `
+            <button class="action-btn delete-btn" onclick="deleteItem('${item.id}')" title="Delete Item">
+              <i class="fas fa-trash"></i>
+            </button>`;
+        }
+        
+        // Update and Cancel buttons (for edit mode)
+        actionButtons += `
+          <button class="action-btn update-btn" style="display:none;" onclick="updateItem(${index})">
+            <i class="fas fa-save"></i>
+          </button>
+          <button class="action-btn cancel-btn" style="display:none;" onclick="cancelEdit(${index})">
+            <i class="fas fa-times"></i>
+          </button>`;
+        
+        row.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.type}</td>
+          <td>${item.category}</td>
+          <td>${item.name}</td>
+          <td>${item.purchasedQty}</td>
+          <td>${item.usedQty}</td>
+          <td>${item.productQty}</td>
+          <td>${item.soldQty}</td>
+          <td>${item.remainingQty}</td>
+          <td>${item.reorderLevel}</td>
+          <td>
+            <span class="reorder-flag ${item.reorderRequired ? 'reorder-yes' : 'reorder-no'}">
+              ${item.reorderRequired ? 'Yes' : 'No'}
+            </span>
+          </td>
+          <td class="action-cell">
+            ${actionButtons}
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+      
+      renderPagination();
+    }
+    
+    function renderPagination() {
+      const totalPages = Math.ceil(filteredItems.length / pageSize);
+      const paginationDiv = document.getElementById('pagination');
+      paginationDiv.innerHTML = '';
+      
+      if (totalPages <= 1) return;
+      
+      // Previous button
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'page-btn';
+      prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.onclick = () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderItemTable();
+        }
+      };
+      paginationDiv.appendChild(prevBtn);
+      
+      // Page buttons
+      for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => {
+          currentPage = i;
+          renderItemTable();
+        };
+        paginationDiv.appendChild(pageBtn);
+      }
+      
+      // Next button
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'page-btn';
+      nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderItemTable();
+        }
+      };
+      paginationDiv.appendChild(nextBtn);
+    }
+    
+    // ===========================================
+    // INVENTORY OPERATIONS
+    // ===========================================
+    
+    function generateInventoryId() {
+      // Additional check
+      if (!inventoryPermissions.canAdd) {
+        alert('You do not have permission to add inventory items');
+        return;
+      }
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(newId) {
+          document.getElementById('inventoryId').value = newId;
+          hideProcessing();
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error generating item ID:', error);
+          alert('Error: ' + error.message);
+        })
+        .itemGenerateInventoryId(sessionToken);
+    }
+    
+    function saveQuickAddType() {
+      // Additional check
+      if (!inventoryPermissions.canAdd) {
+        alert('You do not have permission to add new types');
+        return;
+      }
+      
+      const newType = document.getElementById('quickAddType').value.trim();
+      
+      if (!newType) {
+        alert('Please enter a new item type');
+        return;
+      }
+      
+      // Check if type already exists
+      if (types.includes(newType)) {
+        alert('This item type already exists');
+        return;
+      }
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function() {
+          // Add to local types array
+          types.push(newType);
+          // Update dropdown
+          populateTypeDropdown();
+          // Select the new type
+          $('#itemType').val(newType).trigger('change');
+          // Close modal
+          closeQuickAddTypeModal();
+          hideProcessing();
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error adding type:', error);
+          alert('Error: ' + error.message);
+          hideProcessing();
+        })
+        .itemAddNewType(sessionToken, newType);
+    }
+    
+    function saveQuickAddCategory() {
+      // Additional check
+      if (!inventoryPermissions.canAdd) {
+        alert('You do not have permission to add new categories');
+        return;
+      }
+      
+      const newCategory = document.getElementById('quickAddCategory').value.trim();
+      
+      if (!newCategory) {
+        alert('Please enter a new item category');
+        return;
+      }
+      
+      // Check if category already exists
+      if (categories.includes(newCategory)) {
+        alert('This item category already exists');
+        return;
+      }
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function() {
+          // Add to local categories array
+          categories.push(newCategory);
+          // Update dropdown
+          populateCategoryDropdown();
+          // Select the new category
+          $('#itemCategory').val(newCategory).trigger('change');
+          // Close modal
+          closeQuickAddCategoryModal();
+          hideProcessing();
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error adding category:', error);
+          alert('Error: ' + error.message);
+          hideProcessing();
+        })
+        .itemAddNewCategory(sessionToken, newCategory);
+    }
+    
+    function saveNewInventoryItem() {
+      // Additional check
+      if (!inventoryPermissions.canAdd) {
+        alert('You do not have permission to add inventory items');
+        return;
+      }
+      
+      const item = {
+        id: document.getElementById('inventoryId').value,
+        type: $('#itemType').val(),
+        category: $('#itemCategory').val(),
+        name: $('#itemName').val ? $('#itemName').val() : document.getElementById('itemName').value,
+        reorderLevel: parseInt(document.getElementById('reorderLevel').value) || 0
+      };
+      
+      // Validate required fields
+      if (!item.id) {
+        alert('Please generate an Item ID');
+        return;
+      }
+      
+      if (!item.type) {
+        alert('Please select Item Type');
+        return;
+      }
+      
+      if (!item.category) {
+        alert('Please select Item Category');
+        return;
+      }
+      
+      if (!item.name) {
+        alert('Please enter Item Name');
+        return;
+      }
+      
+      if (isNaN(item.reorderLevel)) {
+        alert('Please enter a valid Reorder Level');
+        return;
+      }
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function() {
+          hideProcessing();
+          alert('New Item Added');
+          closeInventoryModal();
+          loadInventoryItems();
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error saving inventory item:', error);
+          alert('Error: ' + error.message);
+        })
+        .itemAddNewInventoryItem(sessionToken, item);
+    }
+    
+    // Edit item row
+    function editItem(index) {
+      // Additional check
+      if (!inventoryPermissions.canEdit) {
+        alert('You do not have permission to edit inventory items');
+        return;
+      }
+      
+      const tableBody = document.getElementById('tableBody');
+      const row = tableBody.rows[index];
+      const cells = row.cells;
+      const item = filteredItems[(currentPage - 1) * pageSize + index];
+      
+      // Make cells editable
+      // Item Type dropdown
+      let typeOptions = types.map(type => 
+        `<option value="${type}" ${type === cells[1].textContent ? 'selected' : ''}>${type}</option>`
+      ).join('');
+      cells[1].innerHTML = `<select class="editable" style="width:100%">${typeOptions}</select>`;
+      
+      // Item Category dropdown
+      let categoryOptions = categories.map(category => 
+        `<option value="${category}" ${category === cells[2].textContent ? 'selected' : ''}>${category}</option>`
+      ).join('');
+      cells[2].innerHTML = `<select class="editable" style="width:100%">${categoryOptions}</select>`;
+      
+      cells[3].innerHTML = `<input type="text" class="editable" value="${cells[3].textContent}">`;
+      cells[9].innerHTML = `<input type="number" class="editable" min="0" value="${parseInt(cells[9].textContent)}">`;
+      
+      // Show update/cancel buttons
+      const actionCell = cells[11];
+      actionCell.querySelector('.edit-btn').style.display = 'none';
+      actionCell.querySelector('.delete-btn').style.display = 'none';
+      actionCell.querySelector('.update-btn').style.display = 'inline-block';
+      actionCell.querySelector('.cancel-btn').style.display = 'inline-block';
+    }
+    
+    // Cancel edit
+    function cancelEdit(index) {
+      renderItemTable(); // Simply re-render the table to reset
+    }
+    
+    // Update item
+    function updateItem(index) {
+      // Additional check
+      if (!inventoryPermissions.canEdit) {
+        alert('You do not have permission to edit inventory items');
+        return;
+      }
+      
+      const tableBody = document.getElementById('tableBody');
+      const row = tableBody.rows[index];
+      const cells = row.cells;
+      const originalItem = filteredItems[(currentPage - 1) * pageSize + index];
+      
+      const item = {
+        id: cells[0].textContent,
+        type: cells[1].querySelector('select').value,
+        category: cells[2].querySelector('select').value,
+        name: cells[3].querySelector('input').value,
+        reorderLevel: parseInt(cells[9].querySelector('input').value) || 0
+      };
+      
+      // Validate required fields
+      if (!item.type) {
+        alert('Please select Item Type');
+        return;
+      }
+      
+      if (!item.category) {
+        alert('Please select Item Category');
+        return;
+      }
+      
+      if (!item.name) {
+        alert('Please enter Item Name');
+        return;
+      }
+      
+      if (isNaN(item.reorderLevel)) {
+        alert('Please enter a valid Reorder Level');
+        return;
+      }
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function() {
+          hideProcessing();
+          alert('Inventory Item Updated');
+          loadInventoryItems();
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error updating item:', error);
+          alert('Error: ' + error.message);
+        })
+        .itemUpdateInventoryItem(sessionToken, item);
+    }
+    
+    // Delete item
+    function deleteItem(itemId) {
+      // Additional check
+      if (!inventoryPermissions.canDelete) {
+        alert('You do not have permission to delete inventory items');
+        return;
+      }
+      
+      if (confirm('Are you sure you want to delete this inventory item?')) {
+        showProcessing();
+        google.script.run
+          .withSuccessHandler(function(result) {
+            hideProcessing();
+            if (result === 'success') {
+              loadInventoryItems();
+            } else if (result === 'quantity_error') {
+              alert('Item with stock in hand can\'t be deleted');
+            } else {
+              alert('Error deleting item');
+            }
+          })
+          .withFailureHandler(function(error) {
+            hideProcessing();
+            console.error('Error deleting item:', error);
+            alert('Error: ' + error.message);
+          })
+          .itemDeleteInventoryItem(sessionToken, itemId);
+      }
+    }
+    
+    // ===========================================
+    // SEARCH FUNCTIONS
+    // ===========================================
+    
+    function searchItems() {
+      const criteria = document.getElementById('searchCriteria').value;
+      const inventoryType = document.getElementById('inventoryTypeFilter').value;
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      
+      // First filter by inventory type
+      if (inventoryType === 'raw') {
+        filteredItems = allItems.filter(item => {
+          // Raw materials: have purchased quantity but no product quantity
+          return item.purchasedQty > 0 && item.productQty === 0;
+        });
+      } else if (inventoryType === 'produced') {
+        filteredItems = allItems.filter(item => {
+          // Produced items: have product quantity
+          return item.productQty > 0;
+        });
+      } else {
+        filteredItems = [...allItems];
+      }
+      
+      // Then apply text search if query exists
+      if (query) {
+        filteredItems = filteredItems.filter(item => {
+          if (criteria === 'all') {
+            return (
+              item.type.toLowerCase().includes(query) ||
+              item.category.toLowerCase().includes(query) ||
+              item.name.toLowerCase().includes(query)
+            );
+          } else if (criteria === 'Item Type') {
+            return item.type.toLowerCase().includes(query);
+          } else if (criteria === 'Item Category') {
+            return item.category.toLowerCase().includes(query);
+          } else if (criteria === 'Item Name') {
+            return item.name.toLowerCase().includes(query);
+          } else if (criteria === 'Reorder Required') {
+            return item.reorderRequired;
+          }
+          return true;
+        });
+      }
+      
+      // If only reorder required filter is selected without text query
+      if (criteria === 'Reorder Required' && !query) {
+        filteredItems = filteredItems.filter(item => {
+          return item.reorderRequired;
+        });
+      }
+      
+      currentPage = 1;
+      renderItemTable();
+      
+      if (filteredItems.length === 0) {
+        alert('No matching data found');
+      }
+    }
+    
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchCriteria').value = 'all';
+      document.getElementById('inventoryTypeFilter').value = 'all';
+      filteredItems = [...allItems];
+      currentPage = 1;
+      renderItemTable();
+    }
+    
+    // ===========================================
+    // HELPER FUNCTIONS
+    // ===========================================
+    
+    function showError(message) {
+      alert('Error: ' + message);
+    }
+    
+    function showProcessing() {
+      document.getElementById('processingOverlay').style.display = 'flex';
+    }
+    
+    function hideProcessing() {
+      document.getElementById('processingOverlay').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

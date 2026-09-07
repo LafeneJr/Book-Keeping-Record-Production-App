@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Purchase Orders</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Poppins:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Select2 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+  
+  <!-- Flatpickr (Date Picker) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  
+  <style>
+    .purchase-container {
+      font-family: 'Roboto', sans-serif;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      /* ADDED: Prevent horizontal scrolling on container */
+      overflow-x: hidden;
+    }
+    
+    .purchase-header {
+      margin-bottom: 25px;
+      /* ADDED: Ensure header doesn't scroll */
+      flex-shrink: 0;
+    }
+    
+    .purchase-header h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+      /* ADDED: Prevent text wrapping issues */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .purchase-header p {
+      color: #7f8c8d;
+      font-size: 1.05rem;
+    }
+    
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+      /* ADDED: Prevent action bar from scrolling */
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      /* ADDED: Prevent button group shrinking */
+      flex-shrink: 0;
+    }
+    
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      /* ADDED: Prevent button shrinking */
+      flex-shrink: 0;
+    }
+    
+    .btn-primary {
+      background-color: #1abc9c;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #16a085;
+    }
+    
+    .btn-secondary {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #2980b9;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #bdc3c7;
+      color: #34495e;
+    }
+    
+    .btn-outline:hover {
+      background-color: #ecf0f1;
+    }
+    
+    .search-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      /* ADDED: Prevent search group shrinking */
+      flex-shrink: 0;
+    }
+    
+    .search-select {
+      padding: 9px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      background-color: white;
+      /* ADDED: Prevent select shrinking */
+      flex-shrink: 0;
+    }
+    
+    .search-input {
+      padding: 10px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      width: 250px;
+      /* ADDED: Prevent input shrinking */
+      flex-shrink: 0;
+    }
+    
+    /* ADDED: Table container with horizontal scrolling */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+    
+    .purchase-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px; /* Ensure table has minimum width */
+    }
+    
+    .purchase-table th {
+      background-color: #2c3e50;
+      color: white;
+      padding: 12px 15px;
+      text-align: left;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .purchase-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ecf0f1;
+      color: #34495e;
+    }
+    
+    .purchase-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .action-cell {
+      display: flex;
+      gap: 8px;
+      /* ADDED: Prevent action cell shrinking */
+      flex-shrink: 0;
+    }
+    
+    .action-btn {
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    
+    .view-btn {
+      background-color: #3498db;
+      color: white;
+      border: none;
+    }
+    
+    .edit-btn {
+      background-color: #f39c12;
+      color: white;
+      border: none;
+    }
+    
+    .update-btn {
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+    }
+    
+    .cancel-btn {
+      background-color: #95a5a6;
+      color: white;
+      border: none;
+    }
+    
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      /* ADDED: Ensure modal doesn't get affected by horizontal scroll */
+      overflow: hidden;
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 25px;
+      border-radius: 8px;
+      width: 450px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      /* ADDED: Prevent modal content shrinking */
+      flex-shrink: 0;
+      overflow: hidden:
+    }
+    
+    /* Full screen modal for PO creation */
+    .modal-content-full {
+      background-color: white;
+      margin: 0;
+      padding: 30px;
+      border-radius: 0;
+      width: 100vw;
+      height: 100vh;
+      box-shadow: none;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .modal-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      color: #2c3e50;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    
+    .close-btn {
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #7f8c8d;
+    }
+    
+    .form-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 1px solid #ecf0f1;
+      border-radius: 6px;
+      background-color: #fafafa;
+    }
+    
+    .form-section h3 {
+      font-family: 'Montserrat', sans-serif;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    .form-control:focus {
+      border-color: #1abc9c;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+    }
+    
+    .required:after {
+      content: " *";
+      color: #e74c3c;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .processing-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255,255,255,0.8);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #1abc9c;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .select2-container {
+      width: 100% !important;
+    }
+    
+    .id-generate {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .id-field {
+      flex: 1;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 5px;
+      /* ADDED: Prevent pagination from scrolling horizontally */
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    .page-btn {
+      padding: 8px 12px;
+      background-color: white;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      cursor: pointer;
+      /* ADDED: Prevent page buttons shrinking */
+      flex-shrink: 0;
+    }
+    
+    .page-btn.active {
+      background-color: #1abc9c;
+      color: white;
+      border-color: #1abc9c;
+    }
+    
+    .items-table {
+      width: max-content;
+      table-layout: auto;
+      border-collapse: collapse;
+    }
+    
+    .items-table th, .items-table td {
+      padding: 8px 12px;
+      white-space: nowrap;
+    }
+
+    .items-table input, .items-table select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    
+    .items-table input:focus, .items-table select:focus {
+      border-color: #1abc9c;
+      outline: none;
+    }
+    
+    .items-table .readonly {
+      background-color: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    
+    .items-table-container {
+      max-height: auto;
+      overflow-y: auto;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      margin-top: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .add-item-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 15px;
+      background-color: #1abc9c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+    
+    .remove-item-btn {
+      background: none;
+      border: none;
+      color: #e74c3c;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    
+    .editable {
+      background-color: #fffde7;
+      border: 1px solid #ffd54f;
+    }
+  </style>
+</head>
+<body>
+  <div class="purchase-container">
+    <!-- Header Section -->
+    <div class="purchase-header">
+      <h1>Purchase Orders</h1>
+      <p>Create and manage your purchase orders</p>
+    </div>
+    
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="poOpenNewPOModal()">
+          <i class="fas fa-file-invoice"></i> New Purchase Order
+        </button>
+        <button class="btn btn-secondary" onclick="poOpenPMTStatusModal()">
+          <i class="fas fa-money-bill-wave"></i> Payments Status
+        </button>        
+      </div>
+      
+      <div class="search-group">
+        <select id="poSearchCriteria" class="search-select">
+          <option value="all">All</option>
+          <option value="Purchase Order ID">Purchase Order ID</option>
+          <option value="Supplier Name">Supplier Name</option>          
+          <option value="Payment Status">Payment Status</option>          
+        </select>
+        <input type="text" id="poSearchInput" class="search-input" placeholder="Search...">
+        <button class="btn btn-outline" onclick="poSearchPOs()">
+          <i class="fas fa-search"></i> Search
+        </button>
+        <button class="btn btn-outline" onclick="poClearSearch()">
+          <i class="fas fa-times"></i> Clear
+        </button>
+      </div>
+    </div>
+    
+    <!-- Purchase Orders Table Container -->
+    <div id="poTableContainer">
+      <!-- ADDED: Table wrapper for horizontal scrolling -->
+      <div class="table-container">
+        <table class="purchase-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Purchase Order ID</th>
+              <th>Supplier ID</th>
+              <th>Supplier Name</th>              
+              <th>State</th>
+              <th>City</th>
+              <th>Total Amount</th>
+              <th>Total Paid</th>
+              <th>Purchase Order Balance</th>
+              <th>Payment Status</th>              
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="poTableBody">
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="pagination" id="poPagination">
+        <!-- Pagination buttons will be added here -->
+      </div>
+    </div>
+    
+    <!-- No Data Message -->
+    <div id="poNoData" style="display:none; text-align:center; padding:40px; background:white; border-radius:8px;">
+      <i class="fas fa-inbox" style="font-size:3rem; color:#bdc3c7; margin-bottom:20px;"></i>
+      <h3 style="color:#7f8c8d;">No purchase orders found</h3>
+      <p>Click "New Purchase Order" to create your first purchase order</p>
+    </div>
+  </div>
+  
+  <!-- Payment Status Modal -->
+  <div id="poPMTStatusModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Configure Payment Status</h2>
+        <span class="close-btn" onclick="poClosePMTStatusModal()">&times;</span>
+      </div>
+      <div class="form-group">
+        <label class="required">Payments Status</label>
+        <input type="text" id="poNewPMTStatus" class="form-control" required>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="poClosePMTStatusModal()">Close</button>
+        <button class="btn btn-primary" onclick="poSaveNewPMTStatus()">Save</button>
+      </div>
+    </div>
+  </div>
+    
+  
+  <!-- New Purchase Order Modal -->
+  <div id="poNewPOModal" class="modal">
+    <div class="modal-content modal-content-full">
+      <div class="modal-header">
+        <h2>Create New Purchase Order</h2>
+        <span class="close-btn" onclick="poCloseNewPOModal()">&times;</span>
+      </div>
+      
+      <!-- Section 1: Purchase Order Header -->
+      <div class="form-section">
+        <h3>Purchase Order Information</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="required">Purchase Order ID</label>
+            <div class="id-generate">
+              <input type="text" id="poPOID" class="form-control id-field" readonly>
+              <button class="btn btn-secondary" onclick="poGeneratePOID()">Generate</button>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="required">Purchase Order Date</label>
+            <input type="text" id="poPODate" class="form-control date-picker" placeholder="Select date">
+          </div>
+          
+          <div class="form-group">
+            <label class="required">Supplier Name</label>
+            <select id="poSupplierName" class="form-control" style="width:100%" onchange="poSupplierChanged()"></select>
+          </div>
+          
+          <div class="form-group">
+            <label class="required">Supplier ID</label>
+            <input type="text" id="poSupplierID" class="form-control" readonly>
+          </div>
+          
+          <div class="form-group">
+            <label class="required">State</label>
+            <input type="text" id="poState" class="form-control" readonly>
+          </div>
+          
+          <div class="form-group">
+            <label class="required">City</label>
+            <input type="text" id="poCity" class="form-control" readonly>
+          </div>
+
+          <div class="form-group">
+            <label class="required">Amount Paid</label>
+            <input type="number" id="poAmountPaid" class="form-control" min="0" step="0.01" value="0" onchange="poCalculatePaymentStatus()" oninput="poCalculatePaymentStatus()">
+          </div>
+            
+        </div>
+      </div>
+      
+      <!-- Section 2: Purchase Order Items -->
+      <div class="form-section">
+        <h3>Purchase Order Items</h3>
+        <button class="add-item-btn" onclick="poAddItemRow()">
+          <i class="fas fa-plus"></i> Add Item
+        </button>
+        
+        <div class="items-table-container">
+          <table class="items-table" style="table-layout: auto; width: max-content;">
+            <thead>
+              <tr>                
+                <th>Purchase Detail ID</th>
+                <th>Item ID</th>
+                <th>Item Type</th>
+                <th>Item Category</th>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Unit Cost</th>
+                <th>Shipping Fee</th>
+                <th>Total Price</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="poItemsTableBody">
+              <!-- Item rows will be added here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="poCloseNewPOModal()">Close</button>
+        <button class="btn btn-primary" onclick="poSaveNewPO()">Save Purchase Order</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Purchase Order Details Modal -->
+  <div id="poDetailsModal" class="modal">
+    <div class="modal-content modal-content-full">
+      <div class="modal-header">
+        <h2>Purchase Order Details</h2>
+        <span class="close-btn" onclick="poCloseDetailsModal()">&times;</span>
+      </div>
+      
+      <div id="poDetailsContent">
+        <!-- Purchase Order details will be loaded here -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Processing Overlay -->
+  <div id="poProcessingOverlay" class="processing-overlay">
+    <div class="spinner"></div>
+    <p>Processing...</p>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+    // Global variables
+    let poCurrentPage = 1;
+    const poPageSize = 10;
+    let poAllPOs = [];
+    let poFilteredPOs = [];
+    let poSuppliers = [];
+    let poItems = [];
+    let poPMTStatuses = [];
+    let poShippingStatuses = [];
+    let poDetailCounter = 1;
+
+    // Get permissions from window object (set by Template.html)
+    const purchasePermissions = window.appPermissions?.purchases || {
+      canView: true,
+      canAdd: true,
+      canEdit: true,
+      canDelete: true
+    };
+
+    const sessionToken = window.appPermissions?.token || '';
+
+    //console.log('Purchase Permissions:', purchasePermissions);
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Purchase page initializing...');
+      
+      // Check permissions first
+      if (!setupPurchasePagePermissions()) {
+        console.log('User does not have view permission for purchase orders');
+        return;
+      }
+      
+      // Initialize date picker
+      flatpickr("#poPODate", {
+        dateFormat: "m/d/Y",
+        defaultDate: "today"
+      });
+
+      // Load initial data only if user has permission
+      if (purchasePermissions.canView) {
+        poLoadSuppliers();
+        poLoadInventoryItems();
+        poLoadPMTStatuses();      
+        poLoadPOs();
+      }
+      
+      //console.log('Purchase page initialized with permissions');
+    });
+
+
+    // Function to check if user has permission for specific action
+    function checkPurchasePermission(action) {
+      if (!purchasePermissions[action]) {
+        const actionText = action.replace('can', '').toLowerCase();
+        alert(`You do not have permission to ${actionText} purchase orders.`);
+        return false;
+      }
+      return true;
+    }
+
+    // Function to setup page based on permissions
+    function setupPurchasePagePermissions() {
+      console.log('Setting up purchase page with permissions:', purchasePermissions);
+      
+      // Only load data if user has view permission
+      if (!purchasePermissions.canView) {
+        document.getElementById('poTableContainer').style.display = 'none';
+        document.getElementById('poNoData').style.display = 'block';
+        document.getElementById('poNoData').innerHTML = `
+          <i class="fas fa-ban" style="font-size:3rem; color:#e74c3c; margin-bottom:20px;"></i>
+          <h3 style="color:#e74c3c;">Access Denied</h3>
+          <p>You don't have permission to view purchase orders.</p>
+        `;
+        
+        // Hide action buttons
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+          btn.style.display = 'none';
+        });
+        
+        return false;
+      }
+      
+      // Show/hide action buttons based on permissions
+      const newPOButton = document.querySelector('button[onclick="poOpenNewPOModal()"]');
+      if (newPOButton && !purchasePermissions.canAdd) {
+        newPOButton.style.display = 'none';
+      }
+      
+      return true;
+    }
+
+    // Load suppliers
+    function poLoadSuppliers() {
+      google.script.run
+        .withSuccessHandler(function(suppliers) {
+          poSuppliers = suppliers;
+          const supplierSelect = $('#poSupplierName');
+          supplierSelect.empty();
+
+          poSuppliers.forEach(supplier => {
+            if (supplier.name) {
+              supplierSelect.append(new Option(supplier.name, supplier.id));
+            }
+          });
+
+          supplierSelect.select2();
+        })
+        .withFailureHandler(function(error) {
+          console.error("Error loading suppliers:", error);
+          alert("Error loading suppliers: " + error.message);
+        })
+        .poGetSuppliers(sessionToken);
+    }
+
+    // Load inventory items
+    function poLoadInventoryItems() {
+      google.script.run
+        .withSuccessHandler(function(items) {
+          poItems = items;
+        })
+        .withFailureHandler(function(error) {
+          console.error("Error loading inventory items:", error);
+          alert("Error loading inventory items: " + error.message);
+        })
+        .poGetInventoryItems(sessionToken);
+    }
+
+    // Load Payment statuses
+    function poLoadPMTStatuses() {
+      google.script.run
+        .withSuccessHandler(function(statuses) {
+          poPMTStatuses = statuses;
+        })
+        .withFailureHandler(function(error) {
+          console.error("Error loading payment statuses:", error);
+          alert("Error loading payment statuses: " + error.message);
+        })
+        .poGetPMTStatuses(sessionToken);
+    }
+    
+
+    // Load purchase orders
+    function poLoadPOs() {
+      poShowProcessing();
+      google.script.run
+        .withSuccessHandler(function(pos) {
+          console.log("Fetched Purchase Orders:", pos);
+          poAllPOs = pos;
+          poFilteredPOs = [...pos];
+          poRenderPOTable();
+          poHideProcessing();
+        })
+        .withFailureHandler(function(error) {
+            poHideProcessing();
+            console.error("Error loading Purchase Orders:", error);
+        })
+        .poGetPOs(sessionToken);
+    }
+
+    // Render PO table            
+    function poRenderPOTable() {
+      const startIndex = (poCurrentPage - 1) * poPageSize;
+      const endIndex = startIndex + poPageSize;
+      const pagePOs = poFilteredPOs.slice(startIndex, endIndex);
+      const tableBody = document.getElementById('poTableBody');
+
+      tableBody.innerHTML = '';
+
+      if (pagePOs.length === 0) {
+        document.getElementById('poTableContainer').style.display = 'none';
+        document.getElementById('poNoData').style.display = 'block';
+        document.getElementById('poPagination').innerHTML = '';
+        return;
+      }
+
+      document.getElementById('poTableContainer').style.display = 'block';
+      document.getElementById('poNoData').style.display = 'none';
+
+      pagePOs.forEach((po, index) => {
+        // UPDATED: Format date as MM/dd/yyyy
+        let formattedDate = '';
+        if (po.date) {
+          const dateObj = new Date(po.date);
+          if (!isNaN(dateObj)) {
+            const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+            const day = dateObj.getDate().toString().padStart(2, '0');
+            const year = dateObj.getFullYear();
+            formattedDate = `${month}/${day}/${year}`;
+          } else {
+            formattedDate = po.date; // Fallback to original if not a valid date
+          }
+        }
+
+        let actionButtons = '';
+    
+        if (purchasePermissions.canView) {
+          actionButtons += `
+            <button class="action-btn view-btn" onclick="poViewPODetails('${po.id}')">
+              <i class="fas fa-eye"></i> View
+            </button>`;
+        }
+        
+        if (purchasePermissions.canDelete) {
+          actionButtons += `
+            <button class="action-btn delete-btn" onclick="poDeleteEntirePO('${po.id}', '${po.supplierName}')">
+              <i class="fas fa-trash"></i> Delete
+            </button>`;
+        }
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${formattedDate}</td>
+          <td>${po.id || ''}</td>
+          <td>${po.supplierId || ''}</td>
+          <td>${po.supplierName || ''}</td>
+          <td>${po.state || ''}</td>
+          <td>${po.city || ''}</td>
+          <td>${formatCurrency(po.totalAmount)}</td>
+          <td>${formatCurrency(po.totalPaid)}</td>
+          <td>${formatCurrency(po.poBalance)}</td>
+          <td>${po.pmtStatus || ''}</td>          
+          <td class="action-cell">
+            ${actionButtons}
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      poRenderPagination();
+    }
+
+    // Render pagination
+    function poRenderPagination() {
+      const totalPages = Math.ceil(poFilteredPOs.length / poPageSize);
+      const paginationDiv = document.getElementById('poPagination');
+      paginationDiv.innerHTML = '';
+
+      if (totalPages <= 1) return;
+
+      // Previous button
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'page-btn';
+      prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+      prevBtn.disabled = poCurrentPage === 1;
+      prevBtn.onclick = () => {
+        if (poCurrentPage > 1) {
+          poCurrentPage--;
+          poRenderPOTable();
+        }
+      };
+      paginationDiv.appendChild(prevBtn);
+
+      // Page buttons
+      for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `page-btn ${i === poCurrentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => {
+          poCurrentPage = i;
+          poRenderPOTable();
+        };
+        paginationDiv.appendChild(pageBtn);
+      }
+
+      // Next button
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'page-btn';
+      nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+      nextBtn.disabled = poCurrentPage === totalPages;
+      nextBtn.onclick = () => {
+        if (poCurrentPage < totalPages) {
+          poCurrentPage++;
+          poRenderPOTable();
+        }
+      };
+      paginationDiv.appendChild(nextBtn);
+    }
+
+    // Open Payment Status modal
+    function poOpenPMTStatusModal() {
+      if (!checkPurchasePermission('canAdd')) {
+        return;
+      }
+      document.getElementById('poPMTStatusModal').style.display = 'block';
+      document.getElementById('poNewPMTStatus').value = '';
+    }
+
+    // Close Payment Status modal
+    function poClosePMTStatusModal() {
+      document.getElementById('poPMTStatusModal').style.display = 'none';
+    }
+
+    // Save new Payment Status
+    function poSaveNewPMTStatus() {
+      // Check permission
+      if (!checkPurchasePermission('canAdd')) {
+        return;
+      }
+      const status = document.getElementById('poNewPMTStatus').value.trim();
+
+      if (!status) {
+        alert('Please enter a Payment status');
+        return;
+      }
+
+      poShowProcessing();
+      google.script.run
+        .withSuccessHandler(function() {
+          poHideProcessing();
+          alert('New Payment Status Added');
+          poClosePMTStatusModal();
+          poLoadPMTStatuses();
+        })
+        .withFailureHandler(function(error) {
+            poHideProcessing();
+            console.error("Error adding Payment status:", error);
+            alert("Error adding Payment status: " + error.message);
+        })
+        .poAddNewPMTStatus(sessionToken, status);
+    }
+    
+    
+    
+
+    // Open New PO modal
+    function poOpenNewPOModal() {
+      // Check permission
+      if (!checkPurchasePermission('canAdd')) {
+        return;
+      }
+      document.getElementById('poNewPOModal').style.display = 'block';
+      document.getElementById('poPOID').value = '';
+      document.getElementById('poPODate').value = '';
+      document.getElementById('poSupplierID').value = '';
+      document.getElementById('poState').value = '';
+      document.getElementById('poCity').value = '';
+      document.getElementById('poAmountPaid').value = '0';
+      $('#poSupplierName').val(null).trigger('change');
+      document.getElementById('poItemsTableBody').innerHTML = '';
+      poDetailCounter = 1;
+    }
+
+    // Close New PO modal
+    function poCloseNewPOModal() {
+      document.getElementById('poNewPOModal').style.display = 'none';
+    }
+
+    // Generate PO ID
+    function poGeneratePOID() {
+      // Check permission
+      if (!checkPurchasePermission('canAdd')) {
+        return;
+      }
+      
+      poShowProcessing();
+      google.script.run
+        .withSuccessHandler(function(newId) {
+          document.getElementById('poPOID').value = newId;
+          poHideProcessing();
+        })
+        .withFailureHandler(function(error) {
+            poHideProcessing();
+            console.error("Error generating Purchase Order ID:", error);
+            alert("Error generating Purchase Order ID: " + error.message);
+        })
+        .poGeneratePOID(sessionToken);
+    }
+
+    // Supplier changed handler
+    function poSupplierChanged() {
+      const supplierId = $('#poSupplierName').val();
+      if (!supplierId) return;
+
+      const supplier = poSuppliers.find(s => s.id === supplierId);
+      if (supplier) {
+        document.getElementById('poSupplierID').value = supplier.id;
+        document.getElementById('poState').value = supplier.state;
+        document.getElementById('poCity').value = supplier.city;
+
+        // Update any existing item rows
+        const rows = document.querySelectorAll('#poItemsTableBody tr');
+        rows.forEach(row => {          
+          if (row.cells[3]) row.cells[3].textContent = supplier.name; // Adjusted index from 4 to 3
+          if (row.cells[4]) row.cells[4].textContent = supplier.state; // Adjusted index from 5 to 4
+          if (row.cells[5]) row.cells[5].textContent = supplier.city; // Adjusted index from 6 to 5
+        });
+      }
+    }
+
+    // Add item row
+    function poAddItemRow() {
+      const poId = document.getElementById('poPOID').value;
+      const detailId = `D${Math.floor(10000 + Math.random() * 90000)}`;
+      const tableBody = document.getElementById('poItemsTableBody');
+
+      if (!poId) {
+        alert('Please generate a Purchase Order ID first');
+        return;
+      }
+
+      const row = document.createElement('tr');
+      row.innerHTML = `        
+        <td class="readonly">${detailId}</td>
+        <td><span class="item-id"></span></td>
+        <td><span class="item-type"></span></td>
+        <td><span class="item-category"></span></td>
+        <td>
+          <select class="item-select" onchange="poItemChanged(this)">
+            <option value="">Select Item</option>
+            ${poItems.map(item => `<option value="${item.id}">${item.name}</option>`).join('')}
+          </select>
+        </td>
+        <td><input type="number" min="1" class="qty-purchased" onchange="poCalculateRow(this)" oninput="poCalculateRow(this)"></td>
+        <td><input type="number" min="0.01" step="0.01" class="unit-cost" onchange="poCalculateRow(this)" oninput="poCalculateRow(this)"></td>
+        <td><input type="number" min="0" step="0.01" class="shipping-fee" onchange="poCalculateRow(this)" oninput="poCalculateRow(this)" placeholder="Optional"></td>
+        <td><span class="total-price">${formatCurrency(0)}</span></td>
+        <td><button class="remove-item-btn" onclick="poRemoveItemRow(this)"><i class="fas fa-times"></i></button></td>
+      `;
+
+      tableBody.appendChild(row);
+    }
+
+    // Calculate payment status based on amount paid    
+    function poCalculatePaymentStatus() {
+      const amountPaid = parseFloat(document.getElementById('poAmountPaid').value) || 0;
+      const totalAmount = poCalculateTotalAmount();
+      
+      let status = "Unpaid";
+      if (amountPaid > 0) {
+        if (amountPaid >= totalAmount) {
+          status = "Paid";
+        } else {
+          status = "Partial";
+        }
+      }
+      
+      // Optional: Display status to user for feedback
+      console.log(`Payment Status: ${status}, Amount Paid: ${amountPaid}, Total: ${totalAmount}`);
+      
+      return status;
+    }
+
+    // Calculate total amount from all items
+    function poCalculateTotalAmount() {
+      let total = 0;
+      const rows = document.querySelectorAll('#poItemsTableBody tr');
+      
+      rows.forEach(row => {
+        const totalPrice = parseFloat(row.querySelector('.total-price').textContent) || 0;
+        total += totalPrice;
+      });
+      
+      return total;
+    }
+
+    // Item changed handler
+    function poItemChanged(select) {
+      const row = select.closest('tr');
+      const itemId = select.value;
+
+      if (!itemId) {
+        row.querySelector('.item-id').textContent = '';
+        row.querySelector('.item-type').textContent = '';
+        row.querySelector('.item-category').textContent = '';
+        return;
+      }
+
+      const item = poItems.find(i => i.id === itemId);
+      if (item) {
+        row.querySelector('.item-id').textContent = item.id;
+        row.querySelector('.item-type').textContent = item.type;
+        row.querySelector('.item-category').textContent = item.category;
+      }
+
+      // Trigger calculation
+      poCalculateRow(select);
+    }
+
+    // Calculate row values
+    function poCalculateRow(input) {
+      const row = input.closest('tr');
+      const qty = parseFloat(row.querySelector('.qty-purchased').value) || 0;
+      const unitCost = parseFloat(row.querySelector('.unit-cost').value) || 0;
+      const shippingFees = parseFloat(row.querySelector('.shipping-fee').value) || 0;
+
+      const totalPrice = (qty * unitCost) + shippingFees;
+      row.querySelector('.total-price').textContent = formatCurrency(totalPrice);
+      
+      // NEW: Recalculate payment status when items change
+      poCalculatePaymentStatus();
+    }
+
+    // Save new PO    
+    function poSaveNewPO() {
+      // Check permission
+      if (!checkPurchasePermission('canAdd')) {
+        return;
+      }
+      const poId = document.getElementById('poPOID').value;
+      const poDate = document.getElementById('poPODate').value;
+      const supplierId = document.getElementById('poSupplierID').value;
+      const supplierName = $('#poSupplierName option:selected').text();
+      const amountPaid = parseFloat(document.getElementById('poAmountPaid').value) || 0;
+
+      if (!poId) {
+        alert('Please generate a Purchase Order ID');
+        return;
+      }
+
+      if (!poDate) {
+        alert('Please select a Purchase date');
+        return;
+      }
+
+      if (!supplierId) {
+        alert('Please select a supplier');
+        return;
+      }
+
+      const items = [];
+      const rows = document.querySelectorAll('#poItemsTableBody tr');
+
+      if (rows.length === 0) {
+        alert('Please add at least one item to the Purchase Order');
+        return;
+      }
+
+      let isValid = true;
+
+      rows.forEach(row => {
+        // [Existing item validation code remains the same...]
+        const itemSelectElement = row.querySelector('.item-select');
+        const itemId = row.querySelector('.item-id') ? row.querySelector('.item-id').textContent : '';
+        const qtyInput = row.querySelector('.qty-purchased');
+        const unitCostInput = row.querySelector('.unit-cost');
+        const shippingFeesInput = row.querySelector('.shipping-fee');
+
+        if (!itemSelectElement || !qtyInput || !unitCostInput) {
+          console.error('Missing required elements in row:', row);
+          isValid = false;
+          return;
+        }
+
+        const qty = parseFloat(qtyInput.value) || 0;
+        const unitCost = parseFloat(unitCostInput.value) || 0;
+        const shippingFees = parseFloat(shippingFeesInput ? shippingFeesInput.value : 0) || 0;
+
+        if (!itemId) {
+          isValid = false;
+          alert('Please select an item for all rows');
+          return;
+        }
+
+        if (qty <= 0) {
+          isValid = false;
+          alert('Please enter a valid quantity for all items');
+          return;
+        }
+
+        if (unitCost <= 0) {
+          isValid = false;
+          alert('Please enter a valid unit cost for all items');
+          return;
+        }
+
+        const selectedItemName = itemSelectElement && itemSelectElement.selectedIndex !== -1
+                                ? itemSelectElement.options[itemSelectElement.selectedIndex].textContent
+                                : '';
+
+        const totalPrice = (qty * unitCost) + shippingFees;
+
+        const item = {
+          date: document.getElementById('poPODate').value, // Get from form, not table
+          poId: document.getElementById('poPOID').value, // Get from form, not table
+          detailId: row.cells[0].textContent, // Now index 0 (Purchase Detail ID)
+          supplierName: $('#poSupplierName option:selected').text(), // Get from form
+          state: document.getElementById('poState').value, // Get from form
+          city: document.getElementById('poCity').value, // Get from form
+          itemId: itemId,
+          itemType: row.cells[2].textContent, // Now index 2 (Item Type)
+          itemCategory: row.cells[3].textContent, // Now index 3 (Item Category)
+          itemName: selectedItemName,
+          qtyPurchased: qty,
+          unitCost: unitCost,
+          shippingFees: shippingFees,
+          totalPrice: totalPrice
+        };
+
+        items.push(item);
+      });
+
+      if (!isValid) return;
+
+      // Create payment transaction object
+      const paymentTransaction = {
+        supplierId: supplierId,
+        supplierName: supplierName,
+        poId: poId,
+        date: poDate,
+        amountPaid: amountPaid,
+        type: 'purchase_payment'
+      };
+
+      poShowProcessing();
+      google.script.run
+        .withSuccessHandler(function() {
+          poHideProcessing();
+          alert('New Purchase Order Created Successfully');
+          poCloseNewPOModal();
+          poLoadPOs();
+        })
+        .withFailureHandler(function(error) {
+          poHideProcessing();
+          console.error("Error saving Purchase Order:", error);
+          alert("Error saving Purchase Order: " + error.message);
+        })
+        .poSaveNewPO(sessionToken, items, amountPaid, paymentTransaction, supplierId, amountPaid);
+    }
+
+// View Purchase Order details
+function poViewPODetails(poId) {
+  // Check permission
+  if (!checkPurchasePermission('canView')) {
+    return;
+  }
+  poShowProcessing();
+  google.script.run
+    .withSuccessHandler(function(data) {
+      const master = data.master;
+      const details = data.details;
+
+      console.log('Master data received:', master);
+      console.log('Details data received:', details);
+
+      if (!details || details.length === 0) {
+        poHideProcessing();
+        alert("No details found for this Purchase Order");
+        return;
+      }
+
+      let html = `
+      <div class="form-section">
+        <h3>Purchase Order Details: ${poId}</h3>
+        
+        <!-- Purchase Order Header Information -->
+        <div class="form-grid" style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 6px;">
+          <div class="form-group">
+            <label><strong>Supplier:</strong></label>
+            <div>${master.supplierName || 'N/A'}</div>
+          </div>
+          <div class="form-group">
+            <label><strong>Date:</strong></label>
+            <div>${master.date || 'N/A'}</div>
+          </div>
+          <div class="form-group">
+            <label><strong>Total Amount:</strong></label>
+            <div>${formatCurrency(master.totalAmount || 0)}</div>
+          </div>
+          <div class="form-group">
+            <label><strong>Payment Status:</strong></label>
+            <div>${master.paymentStatus || 'Unpaid'}</div>
+          </div>
+          <div class="form-group">
+            <label><strong>Amount Paid:</strong></label>
+            <div id="poDetailsAmountPaidDisplay">${formatCurrency(master.amountPaid || 0)}</div>
+            <input type="number" id="poDetailsAmountPaidEdit" class="form-control" 
+                  style="display: none; margin-top: 5px;" 
+                  min="0" step="0.01" 
+                  value="${master.amountPaid || '0'}">
+          </div>
+        </div>
+
+        <div class="items-table-container">
+          <table id="poDetailsTable" class="items-table">
+            <thead>
+              <tr>                
+                <th>Purchase Detail ID</th>
+                <th>Item ID</th>
+                <th>Item Type</th>
+                <th>Item Category</th>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Unit Cost</th>
+                <th>Shipping Fee</th>
+                <th>Total Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      details.forEach(detail => {
+        console.log('Processing detail:', detail);
+        
+        html += `
+          <tr data-detail-id="${detail.detailId || ''}">              
+              <td>${detail.detailId || 'N/A'}</td>
+              <td class="item-id">${detail.itemId || 'N/A'}</td>
+              <td class="item-type">${detail.itemType || 'N/A'}</td>
+              <td class="item-category">${detail.itemCategory || 'N/A'}</td>
+              <td class="item-name">${detail.itemName || 'N/A'}</td>
+              <td class="qty-purchased">${formatNumber(detail.qtyPurchased || 0)}</td>
+              <td class="unit-cost">${formatCurrency(detail.unitCost || 0)}</td>
+              <td class="shipping-fee">${formatCurrency(detail.shippingFees || 0)}</td>
+              <td class="total-price">${formatCurrency(detail.totalPrice || 0)}</td>
+              <td class="actions-cell">
+                  <button class="action-btn delete-btn"
+                          onclick="poDeleteDetail('${detail.detailId || ''}')">
+                      <i class="fas fa-trash"></i> Delete
+                  </button>
+              </td>
+          </tr>
+        `;
+      });
+      
+      html += `
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-footer" style="text-align:right; margin-top:10px;">
+            <button class="btn btn-outline" onclick="poCloseDetailsModal()" style="margin-right: auto;">
+              <i class="fas fa-times"></i> Close
+            </button>
+            <button id="poEditAllBtn" class="btn btn-secondary" onclick="poEnableEditMode()">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button id="poSaveAllBtn" class="btn btn-primary" style="display:none" onclick="poSavePODetails()">
+              <i class="fas fa-save"></i> Update
+            </button>
+            <button id="poCancelAllBtn" class="btn btn-outline" style="display:none" onclick="poCancelEditMode()">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('poDetailsContent').innerHTML = html;
+      document.getElementById('poDetailsModal').style.display = 'block';
+      poHideProcessing();
+    })
+    .withFailureHandler(function(err){
+      poHideProcessing();
+      console.error("Error loading PO details:", err);
+      alert("Error loading PO details: " + err.message);
+    })
+    .poGetPODetailsWithMaster(sessionToken, poId);
+}
+
+    // Close Purchase Order details modal
+    function poCloseDetailsModal() {
+      document.getElementById('poDetailsModal').style.display = 'none';
+      
+      // NEW: Refresh the main PO table when closing details modal
+      // This ensures any changes made in the details are reflected in the main table
+      poLoadPOs();
+    }
+
+    // Search Purchase Orders
+    function poSearchPOs() {
+      const criteria = document.getElementById('poSearchCriteria').value;
+      const query = document.getElementById('poSearchInput').value.toLowerCase().trim();
+
+      if (!query) {
+        poFilteredPOs = [...poAllPOs];
+      } else {
+        poFilteredPOs = poAllPOs.filter(po => {
+          if (criteria === 'all') {
+            return (
+              (po.id && po.id.toLowerCase().includes(query)) ||
+              (po.supplierName && po.supplierName.toLowerCase().includes(query)) ||
+              (po.pmtStatus && po.pmtStatus.toLowerCase().includes(query))
+              // Removed: Shipping Status search
+            );
+          } else if (criteria === 'Purchase Order ID') {
+            return po.id && po.id.toLowerCase().includes(query);
+          } else if (criteria === 'Supplier Name') {
+            return po.supplierName && po.supplierName.toLowerCase().includes(query);
+          } else if (criteria === 'Payment Status') {
+            return po.pmtStatus && po.pmtStatus.toLowerCase().includes(query);
+          }
+          // Removed: Shipping Status criteria
+          return true;
+        });
+      }
+
+      poCurrentPage = 1;
+      poRenderPOTable();
+
+      if (poFilteredPOs.length === 0) {
+        alert('No matching data found');
+      }
+    }
+
+    // Clear search
+    function poClearSearch() {
+      document.getElementById('poSearchInput').value = '';
+      document.getElementById('poSearchCriteria').value = 'all';
+      poFilteredPOs = [...poAllPOs];
+      poCurrentPage = 1;
+      poRenderPOTable();
+    }
+
+    // Show processing overlay
+    function poShowProcessing() {
+      document.getElementById('poProcessingOverlay').style.display = 'flex';
+    }
+
+    // Hide processing overlay
+    function poHideProcessing() {
+      document.getElementById('poProcessingOverlay').style.display = 'none';
+    }
+
+    // Edit mode functions
+    function poEnableEditMode() {
+      document.getElementById('poEditAllBtn').style.display = 'none';
+      document.getElementById('poSaveAllBtn').style.display = 'inline-block';
+      document.getElementById('poCancelAllBtn').style.display = 'inline-block';
+
+      // Show Amount Paid input field
+      document.getElementById('poDetailsAmountPaidDisplay').style.display = 'none';
+      document.getElementById('poDetailsAmountPaidEdit').style.display = 'block';
+
+      document.querySelectorAll('#poDetailsTable tbody tr').forEach(row => {
+        // ITEM NAME → dropdown
+        const nameTd = row.querySelector('.item-name');
+        const curr = nameTd.textContent;
+        nameTd.innerHTML = `<select class="edit-item-select">
+          ${poItems.map(i => `<option value="${i.id}" ${i.name === curr ? 'selected' : ''}>${i.name}</option>`).join('')}
+        </select>`;
+        
+        // Update item details when selection changes
+        nameTd.querySelector('select').onchange = function() {
+          const it = poItems.find(x => x.id === this.value);
+          if (it) {
+            row.querySelector('.item-id').textContent = it.id;
+            row.querySelector('.item-type').textContent = it.type;
+            row.querySelector('.item-category').textContent = it.category;
+          }
+        };
+
+        // Quantity Purchased - make editable
+        const qtyCell = row.querySelector('.qty-purchased');
+        const qty = qtyCell.textContent.replace(/,/g, '');
+        qtyCell.innerHTML = `<input type="number" class="edit-qty" value="${qty}" min="0" step="1">`;
+        qtyCell.querySelector('input').addEventListener('input', () => poRecalcEditRow(row));
+
+        // Unit Cost - make editable
+        const unitCostCell = row.querySelector('.unit-cost');
+        const unitCost = unitCostCell.textContent.replace(/,/g, '').replace('$', '').trim() || '0.00';
+        unitCostCell.innerHTML = `<input type="number" class="edit-unit-cost" value="${unitCost}" min="0" step="0.01">`;
+        unitCostCell.querySelector('input').addEventListener('input', () => poRecalcEditRow(row));
+
+        // Shipping Fees - make editable
+        const shippingCell = row.querySelector('.shipping-fee');
+        const shipping = shippingCell.textContent.replace(/,/g, '').replace('$', '').trim() || '0.00';
+        shippingCell.innerHTML = `<input type="number" class="edit-shipping" value="${shipping}" min="0" step="0.01">`;
+        shippingCell.querySelector('input').addEventListener('input', () => poRecalcEditRow(row));
+
+        // Total Price - make readonly but recalculated
+        const totalCell = row.querySelector('.total-price');
+        const total = totalCell.textContent.replace(/,/g, '').replace('$', '').trim() || '0.00';
+        totalCell.innerHTML = `<span class="edit-total">${total}</span>`;
+      });
+    }
+
+    // Recalculate derived columns    
+    function poRecalcEditRow(row) {
+      const qty = parseFloat(row.querySelector('.edit-qty').value) || 0;
+      const unitCost = parseFloat(row.querySelector('.edit-unit-cost').value) || 0;
+      const shipping = parseFloat(row.querySelector('.edit-shipping').value) || 0;
+      
+      // Calculate total: (quantity × unit cost) + shipping fees
+      const total = (qty * unitCost) + shipping;
+      
+      // Update total display - ensure it's a proper number
+      row.querySelector('.edit-total').textContent = total.toFixed(2);
+      
+      console.log(`Row calculation: ${qty} × ${unitCost} + ${shipping} = ${total}`);
+    }
+
+    // Cancel & reload
+    function poCancelEditMode() {
+      const poId = document.querySelector('#poDetailsContent h3').textContent.split(':')[1].trim();
+      poViewPODetails(poId);
+    }
+
+    // Gather all and save    
+    function poSavePODetails() {
+      const poId = document.querySelector('#poDetailsContent h3').textContent.split(':')[1].trim();
+      const updatedAmountPaid = parseFloat(document.getElementById('poDetailsAmountPaidEdit').value) || 0;
+      
+      const updates = [];
+      
+      document.querySelectorAll('#poDetailsTable tbody tr').forEach(row => {
+        const qtyInput = row.querySelector('.edit-qty');
+        const unitCostInput = row.querySelector('.edit-unit-cost');
+        const shippingInput = row.querySelector('.edit-shipping');
+        const totalSpan = row.querySelector('.edit-total');
+        
+        // Parse values directly from inputs (they're already without commas)
+        const qtyPurchased = parseFloat(qtyInput ? qtyInput.value : 0) || 0;
+        const unitCost = parseFloat(unitCostInput ? unitCostInput.value : 0) || 0;
+        const shippingFees = parseFloat(shippingInput ? shippingInput.value : 0) || 0;
+        const totalPrice = parseFloat(totalSpan ? totalSpan.textContent : 0) || 0;
+        
+        updates.push({
+          detailId: row.dataset.detailId,
+          poId: poId,
+          itemId: row.querySelector('.item-id').textContent.trim(),
+          itemName: row.querySelector('.edit-item-select').selectedOptions[0].textContent,
+          qtyPurchased: qtyPurchased,
+          unitCost: unitCost,
+          shippingFees: shippingFees,
+          totalPrice: totalPrice
+        });
+      });
+
+      poShowProcessing();
+      google.script.run
+        .withSuccessHandler(() => {
+          poHideProcessing();
+          alert('Purchase Order Details Updated Successfully!');
+          poCloseDetailsModal();
+          poLoadPOs(); // Refresh the main list
+        })
+        .withFailureHandler(err => {
+          poHideProcessing();
+          alert('Update failed: ' + err.message);
+        })
+        .poSavePODetailsWithMaster(sessionToken, updates, poId, updatedAmountPaid);
+    }
+
+    // Delete detail
+    
+    function poDeleteDetail(detailId) {
+      // Check permission
+      if (!checkPurchasePermission('canDelete')) {
+        return;
+      }
+      console.log("poDeleteDetail called with detailId:", detailId);
+      
+      if (!confirm('Delete this item?')) return;
+      
+      poShowProcessing();
+      
+      // Get the PO ID more reliably
+      const headerElement = document.querySelector('#poDetailsContent h3');
+      if (!headerElement) {
+        alert('Error: Cannot find PO details');
+        poHideProcessing();
+        return;
+      }
+      
+      const headerText = headerElement.textContent;
+      console.log("Header text:", headerText);
+      
+      const poId = headerText.split(':')[1] ? headerText.split(':')[1].trim() : '';
+      console.log("Extracted PO ID:", poId);
+      
+      if (!detailId || !poId) {
+        alert('Error: Missing detail ID or PO ID');
+        poHideProcessing();
+        return;
+      }
+      
+      console.log(`Calling server with detailId: ${detailId}, poId: ${poId}`);
+      
+      google.script.run
+        .withSuccessHandler(() => {
+          poHideProcessing();
+          alert('Purchase Order Item Deleted');
+          poCloseDetailsModal();
+          poLoadPOs();
+        })
+        .withFailureHandler((error) => {
+          poHideProcessing();
+          console.error('Delete failed:', error);
+          alert('Delete failed: ' + error.message);
+        })
+        .poDeletePODetail(sessionToken, detailId, poId);
+    }
+
+    // Delete entire Purchase Order
+    function poDeleteEntirePO(poId, supplierName) {
+      // Check permission
+      if (!checkPurchasePermission('canDelete')) {
+        return;
+      }
+      const confirmMessage = `Are you sure you want to delete Purchase Order ${poId} for ${supplierName}?\n\nThis will delete ALL items in this purchase order and cannot be undone!`;
+      
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+
+      poShowProcessing();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          poHideProcessing();
+          if (result.success) {
+            alert(`Purchase Order ${poId} deleted successfully!`);
+            poLoadPOs(); // Refresh the table
+          } else {
+            alert(`Error: ${result.message}`);
+          }
+        })
+        .withFailureHandler(function(error) {
+          poHideProcessing();
+          console.error("Error deleting Purchase Order:", error);
+          alert("Error deleting Purchase Order: " + error.message);
+        })
+        .poDeleteEntirePurchaseOrder(sessionToken, poId);
+    }
+
+    /**
+     * Format currency with commas and 2 decimal places
+     * Example: 1000000.50 -> "1,000,000.50"
+     */
+    function formatCurrency(amount) {
+      if (amount === null || amount === undefined || isNaN(amount)) {
+        return '0.00';
+      }
+      
+      const number = parseFloat(amount);
+      return number.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    /**
+     * Format number with commas (for quantities, etc.)
+     */
+    function formatNumber(number) {
+      if (number === null || number === undefined || isNaN(number)) {
+        return '0';
+      }
+      
+      return parseInt(number).toLocaleString('en-US');
+    }
+
+  </script>
+</body>
+</html>

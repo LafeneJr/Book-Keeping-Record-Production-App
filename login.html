@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book Keeping Record - Login</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Poppins:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>        
+    :root {
+      --sidebar-bg: #1e2a3a;
+      --topbar-bg: #ffffff;
+      --primary: #2c5aa0;
+      --primary-light: #e8eff9;
+      --secondary: #3a7bd5;
+      --accent: #00b894;
+      --text-dark: #2d3748;
+      --text-light: #f7fafc;
+      --border-color: #e2e8f0;
+      --card-bg: #ffffff;
+      --hover-bg: #1e4a8f;
+      --active-nav-color: #3a7bd5;
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --danger: #e17055;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #1e2a3a 0%, #2c5aa0 100%);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    
+    .login-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+    
+    .login-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 35px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .login-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+    
+    .login-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      display: block;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .login-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .login-subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .login-body {
+      padding: 40px;
+    }
+    
+    .form-group {
+      margin-bottom: 25px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-dark);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+    }
+    
+    .input-with-icon {
+      position: relative;
+    }
+    
+    .input-with-icon i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #a0aec0;
+      z-index: 2;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 12px 16px 12px 45px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      transition: var(--transition);
+      background: #f8fafc;
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+      background: white;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 25px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #a0aec0;
+      cursor: pointer;
+      z-index: 2;
+      padding: 5px;
+    }
+    
+    .password-toggle:hover {
+      color: var(--primary);
+    }
+    
+    .btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      font-size: 1rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(44, 90, 160, 0.25);
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--hover-bg) 0%, #2a6fd0 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(44, 90, 160, 0.3);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    .alert {
+      padding: 14px 16px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+      font-size: 0.95rem;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .alert i {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    
+    .alert-error {
+      background-color: rgba(231, 76, 60, 0.1);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      color: #e74c3c;
+    }
+    
+    .alert-success {
+      background-color: rgba(0, 184, 148, 0.1);
+      border: 1px solid rgba(0, 184, 148, 0.3);
+      color: #00b894;
+    }
+    
+    .login-footer {
+      text-align: center;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .login-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .login-link:hover {
+      color: var(--hover-bg);
+      text-decoration: underline;
+    }
+    
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .modal-content {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      max-width: 400px;
+      width: 100%;
+      animation: fadeInUp 0.4s ease-out;
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes shimmer {
+      0% { transform: rotate(45deg) translateX(-100%); }
+      100% { transform: rotate(45deg) translateX(100%); }
+    }
+    
+    /* Responsive */
+    @media (max-width: 480px) {
+      .login-body {
+        padding: 30px 20px;
+      }
+      
+      .login-header {
+        padding: 25px 20px;
+      }
+      
+      .login-title {
+        font-size: 1.5rem;
+      }
+      
+      body {
+        padding: 15px;
+      }
+    }        
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Header -->
+      <div class="login-header">
+        <i class="fas fa-book login-icon"></i>
+        <h1 class="login-title">Book Keeping Record</h1>
+        <p class="login-subtitle">Production Company Management System</p>
+      </div>
+      
+      <!-- Body -->
+      <div class="login-body">
+        <!-- Error Alert -->
+        <div class="alert alert-error" id="errorAlert">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="errorMessage">Invalid credentials. Please try again.</span>
+        </div>
+        
+        <!-- Success Alert -->
+        <div class="alert alert-success" id="successAlert">
+          <i class="fas fa-check-circle"></i>
+          <span id="successMessage">Login successful! Redirecting...</span>
+        </div>
+        
+        <!-- Login Form -->
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <div class="input-with-icon">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="email" class="form-control" 
+                     placeholder="staff@company.com" required autocomplete="email">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-with-icon">
+              <i class="fas fa-lock"></i>
+              <input type="password" id="password" class="form-control" 
+                     placeholder="Enter your password" required autocomplete="current-password">
+              <button type="button" class="password-toggle" id="togglePassword">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary" id="loginBtn">
+              <span id="btnText">Sign In</span>
+              <div class="spinner" id="btnSpinner" style="display: none;"></div>
+            </button>
+          </div>
+        </form>
+        
+        <div class="login-footer">
+          <a href="#" class="login-link" id="forgotPasswordLink">
+            <i class="fas fa-key"></i>
+            Forgot your password?
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div class="modal-overlay" id="forgotPasswordModal">
+    <div class="modal-content">
+      <div class="login-header" style="border-radius: 12px 12px 0 0;">
+        <i class="fas fa-key login-icon"></i>
+        <h2 class="login-title">Reset Password</h2>
+        <p class="login-subtitle">We'll send you a reset link</p>
+      </div>
+      
+      <div class="login-body">
+        <div class="alert alert-error" id="forgotErrorAlert" style="display: none;">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="forgotErrorMessage"></span>
+        </div>
+        
+        <div class="alert alert-success" id="forgotSuccessAlert" style="display: none;">
+          <i class="fas fa-check-circle"></i>
+          <span id="forgotSuccessMessage"></span>
+        </div>
+        
+        <form id="forgotPasswordForm">
+          <div class="form-group">
+            <label for="forgotEmail" class="form-label">Email Address</label>
+            <div class="input-with-icon">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="forgotEmail" class="form-control" 
+                     placeholder="Enter your registered email" required autocomplete="email">
+            </div>
+          </div>
+          
+          <div class="form-group" style="display: flex; gap: 10px; margin-top: 25px;">
+            <button type="button" class="btn" id="cancelForgotBtn" 
+                    style="background: #e2e8f0; color: #4a5568; flex: 1;">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" id="sendResetBtn" style="flex: 1;">
+              <span id="sendResetText">Send Reset Link</span>
+              <div class="spinner" id="sendResetSpinner" style="display: none;"></div>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===========================================
+    // VARIABLES AND ELEMENTS
+    // ===========================================
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    const loginBtn = document.getElementById('loginBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const errorAlert = document.getElementById('errorAlert');
+    const successAlert = document.getElementById('successAlert');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    const forgotEmailInput = document.getElementById('forgotEmail');
+    const cancelForgotBtn = document.getElementById('cancelForgotBtn');
+    const sendResetBtn = document.getElementById('sendResetBtn');
+    const sendResetText = document.getElementById('sendResetText');
+    const sendResetSpinner = document.getElementById('sendResetSpinner');
+    const forgotErrorAlert = document.getElementById('forgotErrorAlert');
+    const forgotSuccessAlert = document.getElementById('forgotSuccessAlert');
+    const forgotErrorMessage = document.getElementById('forgotErrorMessage');
+    const forgotSuccessMessage = document.getElementById('forgotSuccessMessage');
+    
+    // ===========================================
+    // EVENT LISTENERS
+    // ===========================================
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check URL parameters for messages
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      if (urlParams.has('logout') || urlParams.has('expired')) {
+        showSuccess('You have been logged out successfully.');
+      }
+      
+      if (urlParams.has('reset') || urlParams.has('setup')) {
+        showSuccess('Password has been updated successfully. Please log in.');
+      }
+      
+      // Auto-focus email field
+      emailInput.focus();
+    });
+    
+    // Toggle password visibility
+    togglePasswordBtn.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      
+      const icon = this.querySelector('i');
+      icon.classList.toggle('fa-eye');
+      icon.classList.toggle('fa-eye-slash');
+    });
+    
+    // Login form submission
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      performLogin();
+    });
+    
+    // Forgot password link
+    forgotPasswordLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      openForgotPasswordModal();
+    });
+    
+    // Cancel forgot password
+    cancelForgotBtn.addEventListener('click', function() {
+      closeForgotPasswordModal();
+    });
+    
+    // Forgot password form submission
+    forgotPasswordForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      requestPasswordReset();
+    });
+    
+    // Close modal when clicking outside
+    forgotPasswordModal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeForgotPasswordModal();
+      }
+    });
+    
+    // Press Enter to submit login form
+    passwordInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        performLogin();
+      }
+    });
+    
+    // ===========================================
+    // MAIN FUNCTIONS
+    // ===========================================
+    
+    /**
+     * Perform login
+     */
+    function performLogin() {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      
+      // Basic validation
+      if (!email || !password) {
+        showError('Please enter both email and password');
+        return;
+      }
+      
+      if (!validateEmail(email)) {
+        showError('Please enter a valid email address');
+        return;
+      }
+      
+      showLoading();
+      
+      // Call server-side login function
+      google.script.run
+        .withSuccessHandler(handleLoginResponse)
+        .withFailureHandler(handleLoginError)
+        .login(email, password);
+    }
+    
+    /**
+     * Handle login response
+     */
+    function handleLoginResponse(result) {
+      hideLoading();
+      
+      if (result && result.success) {
+        showSuccess(result.message || 'Login successful!');
+        
+        // Store token in localStorage for future use
+        if (result.token) {
+          localStorage.setItem('sessionToken', result.token);
+        }
+        
+        // Get script URL and redirect to dashboard
+        google.script.run
+          .withSuccessHandler(function(scriptUrl) {
+            setTimeout(() => {
+              window.location.href = scriptUrl + '?page=dashboard&token=' + result.token;
+            }, 1500);
+          })
+          .getScriptUrl();
+      } else {
+        showError(result.message || 'Login failed. Please try again.');
+        passwordInput.value = '';
+        passwordInput.focus();
+      }
+    }
+    
+    /**
+     * Handle login error
+     */
+    function handleLoginError(error) {
+      hideLoading();
+      console.error('Login error:', error);
+      showError('System error: ' + error.message);
+      passwordInput.value = '';
+    }
+    
+    /**
+     * Open forgot password modal
+     */
+    function openForgotPasswordModal() {
+      forgotPasswordModal.style.display = 'flex';
+      forgotEmailInput.value = emailInput.value; // Pre-fill with login email
+      forgotEmailInput.focus();
+      hideForgotAlerts();
+    }
+    
+    /**
+     * Close forgot password modal
+     */
+    function closeForgotPasswordModal() {
+      forgotPasswordModal.style.display = 'none';
+      forgotEmailInput.value = '';
+    }
+    
+    /**
+     * Request password reset
+     */
+    function requestPasswordReset() {
+      const email = forgotEmailInput.value.trim();
+      
+      if (!email || !validateEmail(email)) {
+        showForgotError('Please enter a valid email address');
+        return;
+      }
+      
+      showForgotLoading();
+      
+      // Call server-side password reset function
+      google.script.run
+        .withSuccessHandler(handleForgotResponse)
+        .withFailureHandler(handleForgotError)
+        .requestPasswordReset(email);
+    }
+    
+    /**
+     * Handle forgot password response
+     */
+    function handleForgotResponse(result) {
+      hideForgotLoading();
+      
+      if (result && result.success) {
+        showForgotSuccess(result.message || 'Password reset email sent. Please check your inbox.');
+        
+        // Clear form and close modal after 3 seconds
+        setTimeout(() => {
+          closeForgotPasswordModal();
+          forgotEmailInput.value = '';
+        }, 3000);
+      } else {
+        showForgotError(result.message || 'Failed to send reset email. Please try again.');
+      }
+    }
+    
+    /**
+     * Handle forgot password error
+     */
+    function handleForgotError(error) {
+      hideForgotLoading();
+      console.error('Password reset error:', error);
+      showForgotError('System error: ' + error.message);
+    }
+    
+    // ===========================================
+    // UI HELPER FUNCTIONS
+    // ===========================================
+    
+    /**
+     * Show loading state for login
+     */
+    function showLoading() {
+      loginBtn.disabled = true;
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'inline-block';
+    }
+    
+    /**
+     * Hide loading state for login
+     */
+    function hideLoading() {
+      loginBtn.disabled = false;
+      btnText.style.display = 'inline';
+      btnSpinner.style.display = 'none';
+    }
+    
+    /**
+     * Show loading state for forgot password
+     */
+    function showForgotLoading() {
+      sendResetBtn.disabled = true;
+      sendResetText.style.display = 'none';
+      sendResetSpinner.style.display = 'inline-block';
+    }
+    
+    /**
+     * Hide loading state for forgot password
+     */
+    function hideForgotLoading() {
+      sendResetBtn.disabled = false;
+      sendResetText.style.display = 'inline';
+      sendResetSpinner.style.display = 'none';
+    }
+    
+    /**
+     * Show error message
+     */
+    function showError(message) {
+      hideAlerts();
+      errorMessage.textContent = message;
+      errorAlert.style.display = 'flex';
+      scrollToElement(errorAlert);
+    }
+    
+    /**
+     * Show success message
+     */
+    function showSuccess(message) {
+      hideAlerts();
+      successMessage.textContent = message;
+      successAlert.style.display = 'flex';
+      scrollToElement(successAlert);
+    }
+    
+    /**
+     * Show forgot password error
+     */
+    function showForgotError(message) {
+      hideForgotAlerts();
+      forgotErrorMessage.textContent = message;
+      forgotErrorAlert.style.display = 'flex';
+      scrollToElement(forgotErrorAlert);
+    }
+    
+    /**
+     * Show forgot password success
+     */
+    function showForgotSuccess(message) {
+      hideForgotAlerts();
+      forgotSuccessMessage.textContent = message;
+      forgotSuccessAlert.style.display = 'flex';
+      scrollToElement(forgotSuccessAlert);
+    }
+    
+    /**
+     * Hide all alerts
+     */
+    function hideAlerts() {
+      errorAlert.style.display = 'none';
+      successAlert.style.display = 'none';
+    }
+    
+    /**
+     * Hide forgot password alerts
+     */
+    function hideForgotAlerts() {
+      forgotErrorAlert.style.display = 'none';
+      forgotSuccessAlert.style.display = 'none';
+    }
+    
+    // ===========================================
+    // UTILITY FUNCTIONS
+    // ===========================================
+    
+    /**
+     * Validate email format
+     */
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    /**
+     * Scroll to element smoothly
+     */
+    function scrollToElement(element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+  </script>
+</body>
+</html>

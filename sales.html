@@ -1,0 +1,2810 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sales Orders</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Poppins:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Select2 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+  <!-- Flatpickr (Date Picker) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  
+  <style>
+    .sales-container {
+      font-family: 'Roboto', sans-serif;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      /* ADDED: Prevent horizontal scrolling on container */
+      overflow-x: hidden;
+    }
+    
+    .sales-header {
+      margin-bottom: 25px;
+      /* ADDED: Ensure header doesn't scroll */
+      flex-shrink: 0;
+    }
+    
+    .sales-header h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+      /* ADDED: Prevent text wrapping issues */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .sales-header p {
+      color: #7f8c8d;
+      font-size: 1.05rem;
+    }
+    
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+      /* ADDED: Prevent action bar from scrolling */
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      /* ADDED: Prevent button group shrinking */
+      flex-shrink: 0;
+    }
+    
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      /* ADDED: Prevent button shrinking */
+      flex-shrink: 0;
+    }
+    
+    .btn-primary {
+      background-color: #1abc9c;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #16a085;
+    }
+    
+    .btn-secondary {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #2980b9;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #bdc3c7;
+      color: #34495e;
+    }
+    
+    .btn-outline:hover {
+      background-color: #ecf0f1;
+    }
+    
+    .search-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      /* ADDED: Prevent search group shrinking */
+      flex-shrink: 0;
+    }
+    
+    .search-select {
+      padding: 9px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      background-color: white;
+      /* ADDED: Prevent select shrinking */
+      flex-shrink: 0;
+    }
+    
+    .search-input {
+      padding: 10px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      width: 250px;
+      /* ADDED: Prevent input shrinking */
+      flex-shrink: 0;
+    }
+    
+    /* ADDED: Table container with horizontal scrolling */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+    
+    .sales-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px; /* Ensure table has minimum width */
+    }
+    
+    .sales-table th {
+      background-color: #2c3e50;
+      color: white;
+      padding: 12px 15px;
+      text-align: left;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .sales-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ecf0f1;
+      color: #34495e;
+    }
+    
+    .sales-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .action-cell {
+      display: flex;
+      gap: 8px;
+      /* ADDED: Prevent action cell shrinking */
+      flex-shrink: 0;
+    }
+    
+    .action-btn {
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      /* ADDED: Prevent action buttons shrinking */
+      flex-shrink: 0;
+    }
+    
+    .view-btn {
+      background-color: #3498db;
+      color: white;
+      border: none;
+    }
+    
+    .edit-btn {
+      background-color: #f39c12;
+      color: white;
+      border: none;
+    }
+    
+    .update-btn {
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+    }
+    
+    .cancel-btn {
+      background-color: #95a5a6;
+      color: white;
+      border: none;
+    }
+    
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+    }
+
+    .edit-mode-input {
+      width: 100%;
+      padding: 8px;
+      border: 2px solid #1abc9c;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background-color: #fffde7;
+    }
+
+    .edit-mode-input:focus {
+      outline: none;
+      border-color: #16a085;
+      box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+    }
+
+    /* Ensure number inputs work properly in edit mode */
+    input[type="number"].edit-mode-input {
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"].edit-mode-input::-webkit-outer-spin-button,
+    input[type="number"].edit-mode-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .qty-sold:disabled {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
+
+    .stock-warning {
+      color: #856404;
+      background-color: #fff3cd;
+      border: 1px solid #ffeaa7;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 5px;
+    }
+
+    /* Edit Mode Styles */
+    .form-control {
+      width: 100%;
+      padding: 8px 12px;
+      border: 2px solid #1abc9c;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background-color: #fffde7;
+      cursor: text;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #16a085;
+      box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+    }
+
+    .form-control[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    .form-control[type="number"]::-webkit-outer-spin-button,
+    .form-control[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .edit-qty-sold, .edit-unit-price, .edit-tax-rate, .edit-shipping-fees {
+      width: 80px;
+    }
+
+    .items-table input {
+      background-color: #fffde7;
+      border: 1px solid #ffd54f;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      /* ADDED: Ensure modal doesn't get affected by horizontal scroll */
+      overflow: hidden;
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 25px;
+      border-radius: 8px;
+      width: 450px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      /* ADDED: Prevent modal content shrinking */
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    /* Full screen modal for SO creation */
+    .modal-content-full {
+      background-color: white;
+      margin: 0;
+      padding: 30px;
+      border-radius: 0;
+      width: 100vw;
+      height: 100vh;
+      box-shadow: none;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .modal-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      color: #2c3e50;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    
+    .close-btn {
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #7f8c8d;
+    }
+    
+    .form-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 1px solid #ecf0f1;
+      border-radius: 6px;
+      background-color: #fafafa;
+    }
+    
+    .form-section h3 {
+      font-family: 'Montserrat', sans-serif;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    .form-control:focus {
+      border-color: #1abc9c;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+    }
+    
+    .required:after {
+      content: " *";
+      color: #e74c3c;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .processing-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255,255,255,0.8);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #1abc9c;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .select2-container {
+      width: 100% !important;
+    }
+    
+    .id-generate {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .id-field {
+      flex: 1;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 5px;
+      /* ADDED: Prevent pagination from scrolling horizontally */
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    .page-btn {
+      padding: 8px 12px;
+      background-color: white;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      cursor: pointer;
+      /* ADDED: Prevent page buttons shrinking */
+      flex-shrink: 0;
+    }
+    
+    .page-btn.active {
+      background-color: #1abc9c;
+      color: white;
+      border-color: #1abc9c;
+    }
+    
+    .items-table {
+      width: max-content;
+      table-layout: auto;
+      border-collapse: collapse;
+    }
+    
+    .items-table th, .items-table td {
+      padding: 8px 12px;
+      white-space: nowrap;
+    }
+
+    .items-table input, .items-table select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    
+    .items-table input:focus, .items-table select:focus {
+      border-color: #1abc9c;
+      outline: none;
+    }
+    
+    .items-table .readonly {
+      background-color: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    
+    .items-table-container {
+      max-height: auto;
+      overflow-y: auto;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      margin-top: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .add-item-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 15px;
+      background-color: #1abc9c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+    
+    .remove-item-btn {
+      background: none;
+      border: none;
+      color: #e74c3c;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    
+    .editable {
+      background-color: #fffde7;
+      border: 1px solid #ffd54f;
+    }
+    
+    /* No Data Message */
+    .no-data-container {
+      text-align: center;
+      padding: 50px 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-top: 20px;
+    }
+    
+    .no-data-icon {
+      font-size: 3.5rem;
+      color: #bdc3c7;
+      margin-bottom: 20px;
+    }
+    
+    .no-data-title {
+      color: #7f8c8d;
+      margin-bottom: 10px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    /* ===== RECEIPT STYLES ===== */
+    .receipt-content {
+      font-family: 'Arial', sans-serif;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .receipt-header {
+      text-align: center;
+      border-bottom: 3px double #333;
+      padding-bottom: 20px;
+      margin-bottom: 25px;
+    }
+
+    .receipt-company {
+      margin-bottom: 15px;
+    }
+
+    .receipt-company h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 28px;
+      color: #2c3e50;
+      margin: 0 0 5px 0;
+      font-weight: 600;
+    }
+
+    .receipt-company p {
+      margin: 2px 0;
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+
+    .receipt-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 15px 0;
+    }
+
+    .receipt-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 25px;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #1abc9c;
+    }
+
+    .receipt-detail-group p {
+      margin: 8px 0;
+      font-size: 14px;
+    }
+
+    .receipt-detail-label {
+      font-weight: 600;
+      color: #2c3e50;
+      display: inline-block;
+      width: 120px;
+    }
+
+    .receipt-items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .receipt-items-table th {
+      background: #2c3e50;
+      color: white;
+      padding: 12px 15px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .receipt-items-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ecf0f1;
+      font-size: 14px;
+    }
+
+    .receipt-items-table tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .receipt-totals {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 6px;
+      margin-top: 20px;
+      border-left: 4px solid #3498db;
+    }
+
+    .receipt-total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 5px 0;
+      font-size: 15px;
+    }
+
+    .receipt-total-row.subtotal {
+      border-bottom: 1px solid #bdc3c7;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+
+    .receipt-total-row.balance {
+      font-weight: 600;
+      font-size: 16px;
+      color: #2c3e50;
+      border-top: 2px solid #2c3e50;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .receipt-total-amount {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .receipt-footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px double #bdc3c7;
+      color: #7f8c8d;
+      font-size: 13px;
+    }
+
+    .receipt-thank-you {
+      font-size: 16px;
+      color: #1abc9c;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    /* Print-specific styles */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      
+      .modal,
+      .modal * {
+        visibility: visible;
+      }
+      
+      .modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        box-shadow: none;
+      }
+      
+      .modal-content {
+        box-shadow: none;
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      .no-print {
+        display: none !important;
+      }
+      
+      .receipt-content {
+        box-shadow: none;
+        padding: 20px;
+      }
+    }
+
+    /* Make the receipt modal slightly different */
+    #soReceiptModal .modal-content {
+      background: white;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="sales-container">
+    <!-- Header Section -->
+    <div class="sales-header">
+      <h1>Sales Orders</h1>
+      <p>Create and manage your sales orders</p>
+    </div>
+    
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="openNewSOForm()">
+          <i class="fas fa-file-invoice"></i> New Sales Order
+        </button>
+        <button class="btn btn-secondary" onclick="openPaymentModeModal()">
+          <i class="fas fa-money-bill-wave"></i> Payment Mode
+        </button>
+        <!-- <button class="btn btn-secondary" onclick="openPaymentStatusModal()">
+          <i class="fas fa-credit-card"></i> Payment status
+        </button> -->
+      </div>
+      
+      <div class="search-group">
+        <select id="soSearchCriteria" class="search-select">
+          <option value="all">All</option>
+          <option value="Sales Order ID">Sales Order ID</option>
+          <option value="Customer Name">Customer Name</option>          
+          <option value="Payment Mode">Payment Mode</option>
+          <option value="Payment Status">Payment Status</option>
+        </select>
+        <input type="text" id="soSearchInput" class="search-input" placeholder="Search...">
+        <button class="btn btn-outline" onclick="applySearch()">
+          <i class="fas fa-search"></i> Search
+        </button>
+        <button class="btn btn-outline" onclick="clearSearch()">
+          <i class="fas fa-times"></i> Clear
+        </button>
+      </div>
+    </div>
+    
+    <!-- Sales Orders Table Container -->
+    <div id="soTableContainer">
+      <!-- ADDED: Table wrapper for horizontal scrolling -->
+      <div class="table-container">
+        <table class="sales-table">
+          <thead>
+            <tr>
+              <th>Sales Order Date</th>
+              <th>Sales Order ID</th>
+              <th>Customer ID</th>
+              <th>Customer Name</th>              
+              <th>State</th>
+              <th>City</th>
+              <th>Total Sales Order Amount</th>
+              <th>Total Received</th>
+              <th>Sales Order Balance</th>
+              <th>Payment Mode</th>
+              <th>Payment Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="soTableBody">
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="pagination" id="soPagination">
+        <!-- Pagination buttons will be added here -->
+      </div>
+    </div>
+    
+    <!-- No Data Message -->
+    <div id="soNoData" class="no-data-container" style="display:none;">
+      <i class="fas fa-inbox no-data-icon"></i>
+      <h3 class="no-data-title">No sales orders found</h3>
+      <p>Click "New Sales Order" to create your first sales order</p>
+    </div>
+  </div>
+  
+  <!-- payment mode Modal -->
+  <div id="soPaymentModeModal" class="modal">  <!-- Changed ID -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Configure Payment Mode</h2>  <!-- Changed title -->
+        <span class="close-btn" onclick="closePaymentModeModal()">&times;</span>  <!-- Changed function -->
+      </div>
+      <div class="form-group">
+        <label class="required">Payment Mode</label>  <!-- Changed label -->
+        <input type="text" id="soNewPaymentMode" class="form-control" required>  <!-- Changed ID -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closePaymentModeModal()">Close</button>  <!-- Changed function -->
+        <button class="btn btn-primary" onclick="saveNewPaymentMode()">Save</button>  <!-- Changed function -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Payment Status Modal -->
+  <div id="soPaymentStatusModal" class="modal">  <!-- Changed ID -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Configure Payment Status</h2>  <!-- Changed title -->
+        <span class="close-btn" onclick="closePaymentStatusModal()">&times;</span>  <!-- Changed function -->
+      </div>
+      <div class="form-group">
+        <label class="required">Payment Status</label>  <!-- Changed label -->
+        <input type="text" id="soNewPaymentStatus" class="form-control" required>  <!-- Changed ID -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closePaymentStatusModal()">Close</button>  <!-- Changed function -->
+        <button class="btn btn-primary" onclick="saveNewPaymentStatus()">Save</button>  <!-- Changed function -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- New Sales Order Modal -->
+  <div id="soNewSOModal" class="modal">
+    <div class="modal-content modal-content-full">
+      <div class="modal-header">
+        <h2>Create New Sales Order</h2>
+        <span class="close-btn" onclick="closeNewSOModal()">&times;</span>
+      </div>
+      
+      <!-- Section 1: Sales Order Header -->
+      <div class="form-section">
+        <h3>Sales Order Information</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="required">Sales Order ID</label>
+            <div class="id-generate">
+              <input type="text" id="soNewSOID" class="form-control id-field" readonly>
+              <button class="btn btn-secondary" onclick="genSOID()">Generate</button>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="required">Sales Order Date</label>
+            <input type="text" id="soNewDate" class="form-control date-picker" placeholder="Select date">
+          </div>
+          
+          <div class="form-group">
+            <label class="required">Customer Name</label>
+            <select id="soNewCustomer" class="form-control" style="width:100%" onchange="customerChanged()"></select>
+          </div>
+          
+          <div class="form-group">
+            <label class="required">Customer ID</label>
+            <input type="text" id="soNewCustID" class="form-control" readonly>
+          </div>
+          
+          <div class="form-group">
+            <label class="required">State</label>
+            <input type="text" id="soNewState" class="form-control" readonly>
+          </div>
+          
+          <div class="form-group">
+            <label class="required">City</label>
+            <input type="text" id="soNewCity" class="form-control" readonly>
+          </div>
+
+          <div class="form-group">
+            <label>Amount Received</label>
+            <input type="number" id="soAmountReceived" class="form-control" min="0" step="0.01" value="0" onchange="calculateSOBalance()">
+          </div>
+
+          <div class="form-group">
+            <label class="required">Payment Mode</label>
+            <select id="soPaymentMode" class="form-control">
+              <option value="">Select Payment Mode</option>
+              <!-- Options will be populated by JavaScript -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Calculated Balance</label>
+            <input type="text" id="soCalculatedBalance" class="form-control" readonly value="0.00">
+          </div>
+                    
+        </div>
+      </div>
+      
+      <!-- Section 2: Sales Order Items -->
+      <div class="form-section">
+        <h3>Sales Order Items</h3>
+        <button class="add-item-btn" onclick="addSOLine()">
+          <i class="fas fa-plus"></i> Add Item
+        </button>
+        
+        <div class="items-table-container">
+          <table class="items-table" style="table-layout: auto; width: max-content;">
+              <thead>
+                <tr>                                    
+                  <th>Sales Detail ID</th>                                    
+                  <th>State</th>
+                  <th>City</th>                  
+                  <th>Item ID</th>
+                  <th>Item Type</th>
+                  <th>Item Category</th>                  
+                  <th>Item Name</th>
+                  <th>Quantity Sold</th>
+                  <th>Unit Price</th>                  
+                  <th>Shipping Fee</th>
+                  <th>Total Sales Price</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+            <tbody id="soNewLines">
+              <!-- Item rows will be added here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeNewSOModal()">Close</button>
+        <button class="btn btn-primary" onclick="saveNewSO()">Save Sales Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add this after the existing modals -->
+  <!-- New Customer Modal -->
+  <div id="soNewCustomerModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add New Customer</h2>
+        <span class="close-btn" onclick="closeNewCustomerModal()">&times;</span>
+      </div>
+      <div class="form-group">
+        <label class="required">Customer Name</label>
+        <input type="text" id="soNewCustomerName" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>State</label>
+        <input type="text" id="soNewCustomerState" class="form-control" placeholder="Optional">
+      </div>
+      <div class="form-group">
+        <label>City</label>
+        <input type="text" id="soNewCustomerCity" class="form-control" placeholder="Optional">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeNewCustomerModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNewCustomer()">Save Customer</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Sales Order Details Modal -->
+  <div id="soDetailsModal" class="modal">
+    <div class="modal-content modal-content-full">
+      <div class="modal-header">
+        <h2>Sales Order Details</h2>
+        <span class="close-btn" onclick="closeSODetailsModal()">&times;</span>
+      </div>
+      
+      <div id="soDetailsContent">
+        <!-- Sales Order details will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Sales Order Receipt Modal -->
+  <div id="soReceiptModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h2>Sales Order Receipt</h2>
+        <span class="close-btn" onclick="closeReceiptModal()">&times;</span>
+      </div>
+      
+      <div id="soReceiptContent" class="receipt-content">
+        <!-- Receipt content will be loaded here -->
+      </div>
+      
+      <div class="modal-footer no-print">
+        <button class="btn btn-outline" onclick="closeReceiptModal()">
+          <i class="fas fa-times"></i> Close
+        </button>
+        <button class="btn btn-primary" onclick="printReceipt()">
+          <i class="fas fa-print"></i> Print Receipt
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Processing Overlay -->
+  <div id="soProcessingOverlay" class="processing-overlay">
+    <div class="spinner"></div>
+    <p>Processing...</p>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <script>
+    /* === Utility & State === */
+    let soAllData = [];      // Array of { … } from RANGESO
+    let soSearchData = [];   // Filtered view
+    let soCustomers = [];
+    let soInventory = [];
+
+    let soCurrentPage = 1;
+    const soPageSize = 10;
+    let soFilteredData = [];
+    let soPaymentModes = [];
+    
+    /* === Permissions === */
+    // Get permissions from window object (set by Template.html)
+    const salesPermissions = window.appPermissions?.sales || {
+      canView: true,
+      canAdd: true,
+      canEdit: true,
+      canDelete: true
+    };
+
+    const sessionToken = window.appPermissions?.token || '';
+
+    console.log('Sales Permissions:', salesPermissions);
+    
+    /* === Initialization === */
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Sales page initializing...');
+      
+      // Setup page based on permissions
+      if (!setupSalesPagePermissions()) {
+        console.log('User does not have view permission for sales orders');
+        return;
+      }
+      
+      flatpickr("#soNewDate", {
+        dateFormat: "Y-m-d",
+        defaultDate: "today"
+      });
+
+      // Only load data if user has view permission
+      if (salesPermissions.canView) {
+        soRefreshSOList();
+        google.script.run.withSuccessHandler(data => {
+          soInventory = data;
+        }).soGetInventoryItems(sessionToken);
+        
+        // Load customers and payment modes
+        loadCustomers();
+        loadPaymentModes();
+      }
+    });
+
+    /* === Permission Setup === */
+    function setupSalesPagePermissions() {
+      console.log('Setting up sales page with permissions:', salesPermissions);
+      
+      // Only load data if user has view permission
+      if (!salesPermissions.canView) {
+        document.getElementById('soTableContainer').style.display = 'none';
+        document.getElementById('soNoData').style.display = 'block';
+        document.getElementById('soNoData').innerHTML = `
+          <i class="fas fa-ban" style="font-size:3rem; color:#e74c3c; margin-bottom:20px;"></i>
+          <h3 style="color:#e74c3c;">Access Denied</h3>
+          <p>You don't have permission to view sales orders.</p>
+        `;
+        
+        // Hide action buttons
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+          btn.style.display = 'none';
+        });
+        
+        return false;
+      }
+      
+      // Show/hide action buttons based on permissions
+      const newSOButton = document.querySelector('button[onclick="openNewSOForm()"]');
+      if (newSOButton && !salesPermissions.canAdd) {
+        newSOButton.style.display = 'none';
+      }
+      
+      const paymentModeButton = document.querySelector('button[onclick="openPaymentModeModal()"]');
+      if (paymentModeButton && !salesPermissions.canAdd) {
+        paymentModeButton.style.display = 'none';
+      }
+      
+      const paymentStatusButton = document.querySelector('button[onclick="openPaymentStatusModal()"]');
+      if (paymentStatusButton && !salesPermissions.canAdd) {
+        paymentStatusButton.style.display = 'none';
+      }
+      
+      return true;
+    }
+
+    /* === Client-side Permission Checks === */
+    function checkSalesPermissionClient(action) {
+      if (!salesPermissions[action]) {
+        const actionText = action.replace('can', '').toLowerCase();
+        alert(`You do not have permission to ${actionText} sales orders.`);
+        return false;
+      }
+      return true;
+    }
+
+    function loadPaymentModes() {
+      // Check view permission
+      if (!checkSalesPermissionClient('canView')) {
+        return;
+      }
+      
+      google.script.run
+        .withSuccessHandler(function(modes) {
+          soPaymentModes = modes;
+          const paymentModeSelect = document.getElementById('soPaymentMode');
+          paymentModeSelect.innerHTML = '<option value="">Select Payment Mode</option>';
+          
+          modes.forEach(mode => {
+            const option = document.createElement('option');
+            option.value = mode;
+            option.textContent = mode;
+            paymentModeSelect.appendChild(option);
+          });
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading payment modes:', error);
+        })
+        .soGetPaymentModes(sessionToken);
+    }
+
+    function calculateSOBalance() {
+      const amountReceived = parseFormattedNumber(document.getElementById('soAmountReceived').value) || 0;
+      
+      // Calculate total from all line items (parse formatted numbers)
+      let totalSalesAmount = 0;
+      document.querySelectorAll('#soNewLines tr').forEach(tr => {
+        const lineTotal = parseFormattedNumber(tr.querySelector('.total-sales-price').textContent) || 0;
+        totalSalesAmount += lineTotal;
+      });
+      
+      const balance = totalSalesAmount - amountReceived;
+      document.getElementById('soCalculatedBalance').value = formatNumberWithCommas(balance);
+      
+      return {
+        totalSalesAmount: totalSalesAmount,
+        amountReceived: amountReceived,
+        balance: balance
+      };
+    }
+
+    // Load customers for dropdown
+    function loadCustomers() {
+      // Check view permission
+      if (!checkSalesPermissionClient('canView')) {
+        return;
+      }
+      
+      google.script.run
+        .withSuccessHandler(populateCustomerDropdown)
+        .withFailureHandler(err => {
+          console.error('soGetCustomers failed:', err);
+          alert('Could not load customer list.');
+        })
+        .soGetCustomers(sessionToken);
+    }
+
+    /* === Rendering SO List === */
+    function soRefreshSOList() {
+      // Check view permission
+      if (!checkSalesPermissionClient('canView')) {
+        return;
+      }
+      
+      console.log('soRefreshSOList called');
+      document.getElementById('soProcessingOverlay').style.display = 'flex';
+      
+      google.script.run
+        .withSuccessHandler(function(rows) {
+          console.log('Successfully received data:', rows ? rows.length : 0, 'rows');
+          soAllData = rows;
+          soFilteredData = [...rows];
+          soCurrentPage = 1; // Reset to first page
+          renderSOList();
+          document.getElementById('soProcessingOverlay').style.display = 'none';
+        })
+        .withFailureHandler(function(error) {
+          console.error('soGetAllSO failed:', error);
+          document.getElementById('soProcessingOverlay').style.display = 'none';
+          
+          // Show error to user
+          alert('Error loading sales orders: ' + error.message);
+          
+          // Show empty state
+          document.getElementById('soTableContainer').style.display = 'none';
+          document.getElementById('soNoData').style.display = 'block';
+          document.getElementById('soPagination').innerHTML = '';
+        })
+        .soGetAllSO(sessionToken);
+    }
+
+    function renderSOList() {
+      const startIndex = (soCurrentPage - 1) * soPageSize;
+      const endIndex = startIndex + soPageSize;
+      const pageData = soFilteredData.slice(startIndex, endIndex);
+      const tbody = document.querySelector('#soTableBody');
+      tbody.innerHTML = '';
+      
+      if (soFilteredData.length === 0) {
+        document.getElementById('soTableContainer').style.display = 'none';
+        document.getElementById('soNoData').style.display = 'block';
+        document.getElementById('soPagination').innerHTML = '';
+        return;
+      }
+
+      document.getElementById('soTableContainer').style.display = 'block';
+      document.getElementById('soNoData').style.display = 'none';
+
+      pageData.forEach(r => {
+        // Ensure numeric values
+        const totalAmt  = parseFloat(r['Total Sales Order Amount'])  || 0;
+        const received  = parseFloat(r['Total Received'])  || 0;
+        const balance   = parseFloat(r['Sales Order Balance'])      || 0;
+
+        // Create action buttons based on permissions
+        let actionButtons = '';
+        
+        if (salesPermissions.canView) {
+          actionButtons += `
+            <button class="action-btn view-btn" onclick="openSODetails('${r['Sales Order ID']}')">
+              <i class="fas fa-eye"></i> View
+            </button>`;
+        }
+        
+        if (salesPermissions.canDelete) {
+          actionButtons += `
+            <button class="action-btn delete-btn" onclick="deleteSalesOrder('${r['Sales Order ID']}')">
+              <i class="fas fa-trash"></i> Delete
+            </button>`;
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r['Sales Order Date'] || ''}</td>
+          <td>${r['Sales Order ID'] || ''}</td>
+          <td>${r['Customer ID'] || ''}</td>
+          <td>${r['Customer Name'] || ''}</td>
+          <td>${r['State'] || ''}</td>
+          <td>${r['City'] || ''}</td>
+          <td>₦${formatNumberWithCommas(totalAmt)}</td>
+          <td>₦${formatNumberWithCommas(received)}</td>
+          <td>₦${formatNumberWithCommas(balance)}</td>
+          <td>${r['Payment Mode'] || 'Pending'}</td> 
+          <td>${r['Payment Status'] || 'Pending'}</td> 
+          <td class="action-cell">
+            ${actionButtons}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Render pagination
+      renderSOPagination();
+      document.getElementById('soProcessingOverlay').style.display = 'none';
+    }
+
+    function renderSOPagination() {
+      const totalPages = Math.ceil(soFilteredData.length / soPageSize);
+      const paginationDiv = document.getElementById('soPagination');
+      paginationDiv.innerHTML = '';
+
+      if (totalPages <= 1) return;
+
+      // Previous button
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'page-btn';
+      prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+      prevBtn.disabled = soCurrentPage === 1;
+      prevBtn.onclick = () => {
+        if (soCurrentPage > 1) {
+          soCurrentPage--;
+          renderSOList();
+        }
+      };
+      paginationDiv.appendChild(prevBtn);
+
+      // Page buttons
+      for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `page-btn ${i === soCurrentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => {
+          soCurrentPage = i;
+          renderSOList();
+        };
+        paginationDiv.appendChild(pageBtn);
+      }
+
+      // Next button
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'page-btn';
+      nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+      nextBtn.disabled = soCurrentPage === totalPages;
+      nextBtn.onclick = () => {
+        if (soCurrentPage < totalPages) {
+          soCurrentPage++;
+          renderSOList();
+        }
+      };
+      paginationDiv.appendChild(nextBtn);
+    }
+
+
+    /* === Search / Clear === */
+    function applySearch() {
+      const crit = document.getElementById('soSearchCriteria').value;
+      const val  = document.getElementById('soSearchInput').value.toLowerCase();
+      
+      if (!val) {
+        soFilteredData = [...soAllData];
+      } else {
+        if (crit === 'all') {
+          soFilteredData = soAllData.filter(r => {
+            return (
+              (r['Sales Order ID'] && r['Sales Order ID'].toLowerCase().includes(val)) ||
+              (r['Customer Name'] && r['Customer Name'].toLowerCase().includes(val)) ||
+              (r['Payment Mode'] && r['Payment Mode'].toLowerCase().includes(val)) ||
+              (r['Payment Status'] && r['Payment Status'].toLowerCase().includes(val))
+            );
+          });
+        } else {
+          soFilteredData = soAllData.filter(r => {
+            const fieldValue = r[crit] ? r[crit].toString().toLowerCase() : '';
+            return fieldValue.includes(val);
+          });
+        }
+      }
+      
+      soCurrentPage = 1;
+      renderSOList();
+
+      if (soFilteredData.length === 0) {
+        alert('No matching data found');
+      }
+    }
+    
+    function clearSearch() {
+      document.getElementById('soSearchInput').value = '';
+      document.getElementById('soSearchCriteria').value = 'all';
+      soFilteredData = [...soAllData];
+      soCurrentPage = 1; // Reset to first page when clearing
+      renderSOList();
+    }
+
+    /* === Modal Functions === */
+    function openPaymentModeModal() {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      document.getElementById('soPaymentModeModal').style.display = 'block';
+      document.getElementById('soNewPaymentMode').value = '';
+    }
+
+    function closePaymentModeModal() {
+      document.getElementById('soPaymentModeModal').style.display = 'none';
+    }
+
+    function saveNewPaymentMode() {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      const mode = document.getElementById('soNewPaymentMode').value.trim();
+
+      if (!mode) {
+        alert('Please enter a payment mode');
+        return;
+      }
+
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function() {
+          hideProcessing();
+          alert('New Payment Mode Added');
+          closePaymentModeModal();
+          loadPaymentModes();
+        })
+        .withFailureHandler(function(error) {
+            hideProcessing();
+            console.error("Error adding payment mode:", error);
+            alert("Error adding payment mode: " + error.message);
+        })
+        .soAddNewPaymentMode(sessionToken, mode);
+    }
+
+    function openPaymentStatusModal() {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      document.getElementById('soPaymentStatusModal').style.display = 'block';
+      document.getElementById('soNewPaymentStatus').value = '';
+    }
+
+    function closePaymentStatusModal() {
+      document.getElementById('soPaymentStatusModal').style.display = 'none';
+    }
+
+    function saveNewPaymentStatus() {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      const status = document.getElementById('soNewPaymentStatus').value.trim();
+
+      if (!status) {
+        alert('Please enter a payment status');
+        return;
+      }
+
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function() {
+          hideProcessing();
+          alert('New Payment Status Added');
+          closePaymentStatusModal();
+        })
+        .withFailureHandler(function(error) {
+            hideProcessing();
+            console.error("Error adding payment status:", error);
+            alert("Error adding payment status: " + error.message);
+        })
+        .soAddNewPaymentStatus(sessionToken, status);
+    }
+
+    function openNewSOForm() {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      document.getElementById('soNewSOModal').style.display = 'block';
+      document.getElementById('soNewSOID').value = '';
+      document.getElementById('soNewDate').value = '';      
+      document.getElementById('soNewCustID').value = '';
+      document.getElementById('soNewState').value = '';
+      document.getElementById('soNewCity').value = '';
+      document.getElementById('soAmountReceived').value = '0';
+      document.getElementById('soAmountReceived').setAttribute('placeholder', '0.00 (₦)');
+      document.getElementById('soCalculatedBalance').value = '0.00';
+      document.getElementById('soPaymentMode').value = '';
+      $('#soNewCustomer').val(null).trigger('change');
+      document.getElementById('soNewLines').innerHTML = '';
+    }
+
+    function closeNewSOModal() {
+      document.getElementById('soNewSOModal').style.display = 'none';
+    }
+
+    function closeSODetailsModal() {
+      document.getElementById('soDetailsModal').style.display = 'none';
+    }
+
+    function showProcessing() {
+      document.getElementById('soProcessingOverlay').style.display = 'flex';
+    }
+
+    function hideProcessing() {
+      document.getElementById('soProcessingOverlay').style.display = 'none';
+    }
+
+    /* === Customer Dropdown === */
+    function populateCustomerDropdown(customers) {
+      soCustomers = customers;
+      const customerSelect = $('#soNewCustomer');
+      customerSelect.empty();
+
+      customers.forEach(customer => {
+        if (customer['Customer Name']) {
+          customerSelect.append(new Option(customer['Customer Name'], customer['Customer Name']));
+        }
+      });
+
+      // Make the select2 searchable and enable adding new options
+      customerSelect.select2({
+        placeholder: "Select customer or type to search...",
+        allowClear: false,
+        tags: true, // This allows new entries
+        createTag: function (params) {
+          const term = params.term.trim();
+          if (term === '') return null;
+          
+          // Check if term already exists
+          const exists = soCustomers.some(customer => 
+            customer['Customer Name'].toLowerCase() === term.toLowerCase()
+          );
+          
+          if (!exists) {
+            return {
+              id: term,
+              text: term + ' (Add New)',
+              isNew: true
+            };
+          }
+          return null;
+        }
+      });
+
+      // Handle when a selection is made
+      customerSelect.on('select2:select', function (e) {
+        const data = e.params.data;
+        
+        // Check if this is a new customer
+        if (data.isNew) {
+          // Store the new customer name and open the new customer modal
+          soPendingNewCustomer = data.id;
+          openNewCustomerModal(data.id);
+        } else {
+          // Existing customer selected
+          customerChanged();
+        }
+      });
+    }
+
+    // Global variable to track pending new customer
+    let soPendingNewCustomer = null;
+
+    /* === New Customer Modal Functions === */
+    function openNewCustomerModal(customerName = '') {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      document.getElementById('soNewCustomerModal').style.display = 'block';
+      document.getElementById('soNewCustomerName').value = customerName;
+      document.getElementById('soNewCustomerState').value = '';
+      document.getElementById('soNewCustomerCity').value = '';
+      
+      // Auto-generate customer ID
+      generateNewCustomerID();
+    }
+
+    function closeNewCustomerModal() {
+      document.getElementById('soNewCustomerModal').style.display = 'none';
+      soPendingNewCustomer = null;
+      
+      // Reset the customer dropdown
+      $('#soNewCustomer').val(null).trigger('change');
+      document.getElementById('soNewCustID').value = '';
+      document.getElementById('soNewState').value = '';
+      document.getElementById('soNewCity').value = '';
+    }
+
+    function generateNewCustomerID() {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(customerID) {
+          document.getElementById('soNewCustID').value = customerID;
+          hideProcessing();
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error generating customer ID:', error);
+          alert('Error generating customer ID: ' + error.message);
+        })
+        .soGenerateCustomerID(sessionToken);
+    }
+
+    function saveNewCustomer() {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      const customerName = document.getElementById('soNewCustomerName').value.trim();
+      const state = document.getElementById('soNewCustomerState').value.trim();
+      const city = document.getElementById('soNewCustomerCity').value.trim();
+      const customerID = document.getElementById('soNewCustID').value;
+
+      if (!customerName) {
+        alert('Please enter customer name');
+        return;
+      }
+
+      if (!customerID) {
+        alert('Please generate customer ID first');
+        return;
+      }
+
+      showProcessing();
+      
+      const customerData = {
+        'Customer ID': customerID,
+        'Customer Name': customerName,
+        'Customer Contact': '', // Empty
+        'Customer Email': '', // Empty
+        'State': state || '',
+        'City': city || '',
+        'Customer Address': '', // Empty
+        'Total Sales': 0,
+        'Total Receipts': 0,
+        'Balance Receivable': 0
+      };
+
+      google.script.run
+        .withSuccessHandler(function() {
+          hideProcessing();
+          
+          // Add the new customer to the local array
+          soCustomers.push(customerData);
+          
+          // Update the dropdown
+          const customerSelect = $('#soNewCustomer');
+          customerSelect.append(new Option(customerName, customerName));
+          customerSelect.val(customerName).trigger('change');
+          
+          // Set the form fields
+          document.getElementById('soNewState').value = state;
+          document.getElementById('soNewCity').value = city;
+          
+          closeNewCustomerModal();
+          alert('New customer added successfully!');
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error saving new customer:', error);
+          alert('Error saving new customer: ' + error.message);
+        })
+        .soAddNewCustomer(sessionToken, customerData);
+    }
+
+
+    function customerChanged() {
+      const customerName = $('#soNewCustomer').val();
+      if (!customerName) return;
+
+      const customer = soCustomers.find(c => c['Customer Name'] === customerName);
+      if (customer) {
+        document.getElementById('soNewCustID').value = customer['Customer ID'];
+        document.getElementById('soNewState').value = customer['State'];
+        document.getElementById('soNewCity').value = customer['City'];
+
+        // Update any existing item rows (ONLY State and City now)
+        const rows = document.querySelectorAll('#soNewLines tr');
+        rows.forEach(row => {
+          // Only update State and City (indices changed due to removed columns)
+          if (row.cells[1]) row.cells[1].textContent = customer['State']; // State is now index 1
+          if (row.cells[2]) row.cells[2].textContent = customer['City'];  // City is now index 2
+        });
+      }
+    }
+
+    /* === Generate IDs === */
+    function genSOID() {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      showProcessing();
+      google.script.run.withSuccessHandler(id=>{
+        document.getElementById('soNewSOID').value = id;
+        hideProcessing();
+      })
+      .withFailureHandler(function(error) {
+            hideProcessing();
+            console.error("Error generating Sales Order ID:", error);
+            alert("Error generating Sales Order ID: " + error.message);
+        })        
+        .soGenerateSOID(sessionToken);
+    }
+
+    function genDetailID() {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      return new Promise(resolve=>{
+        google.script.run.withSuccessHandler(id=>{
+          resolve(id);
+        }).soGenerateSalesDetailID(sessionToken);
+      });
+    }
+
+    /* === Add / Remove Line Items === */
+    async function addSOLine() {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      const tbody = document.getElementById('soNewLines');
+      const soDate = document.getElementById('soNewDate').value;
+      const soID   = document.getElementById('soNewSOID').value;
+      const custID = document.getElementById('soNewCustID').value;
+      const custNm = $('#soNewCustomer').val();
+      const state  = document.getElementById('soNewState').value;
+      const city   = document.getElementById('soNewCity').value;      
+
+      if (!soID) {
+        alert('Please generate a Sales Order ID first');
+        return;
+      }
+
+      if (!custID) {
+        alert('Please select a customer first');
+        return;
+      }
+
+      const detailID = await genDetailID();
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `        
+        <td class="readonly">${detailID}</td>
+        <td class="readonly">${state}</td>
+        <td class="readonly">${city}</td>          
+        <td><span class="item-id"></span></td>
+        <td><span class="item-type"></span></td>
+        <td><span class="item-category"></span></td>
+        <td>
+          <select class="item-select" onchange="itemChanged(this)">
+            <option value="">Select Item</option>
+            ${soInventory.map(item => `<option value="${item['Item Name']}">${item['Item Name']}</option>`).join('')}
+          </select>
+        </td>
+        <td><input type="number" min="1" class="qty-sold" onchange="recalcLine(this)" oninput="recalcLine(this)" placeholder="0"></td>
+        <td><input type="number" min="0.01" step="0.01" class="unit-price" onchange="recalcLine(this)" oninput="recalcLine(this)" placeholder="0.00"></td>
+        <td><input type="number" min="0" step="0.01" class="shipping-fees" onchange="recalcLine(this)" oninput="recalcLine(this)" placeholder="0.00"></td>
+        <td><span class="total-sales-price">0.00</span></td>
+        <td><button class="remove-item-btn" onclick="removeSOLine(this)"><i class="fas fa-times"></i></button></td>
+      `;
+
+      tbody.appendChild(tr);
+
+      // Initialize Select2 for the item dropdown
+      $(tr.querySelector('.item-select')).select2({
+        placeholder: 'Select Item',
+        width: '100%'
+      });
+    }
+
+    function itemChanged(select) {
+      const row = select.closest('tr');
+      const itemName = select.value;
+
+      if (!itemName) {
+        row.querySelector('.item-id').textContent = '';
+        row.querySelector('.item-type').textContent = '';
+        row.querySelector('.item-category').textContent = '';
+        row.querySelector('.qty-sold').value = '';
+        row.querySelector('.qty-sold').setAttribute('max', '0');
+        return;
+      }
+
+      const item = soInventory.find(i => i['Item Name'] === itemName);
+      if (item) {
+        row.querySelector('.item-id').textContent = item['Item ID'];
+        row.querySelector('.item-type').textContent = item['Item Type'];
+        row.querySelector('.item-category').textContent = item['Item Category'];
+        
+        // Use Remaining Quantity but show as "Max: Quantity"
+        const remainingQty = item['Remaining Quantity'] || 0;
+        const qtyInput = row.querySelector('.qty-sold');
+        qtyInput.setAttribute('max', remainingQty);
+        qtyInput.setAttribute('title', `Max Available: ${remainingQty}`);
+        
+        // Show max quantity information
+        if (remainingQty === 0) {
+          qtyInput.placeholder = 'Out of stock';
+          qtyInput.disabled = true;
+        } else {
+          qtyInput.placeholder = `Max: ${remainingQty}`; // CHANGED: Show as "Max: Quantity"
+          qtyInput.disabled = false;
+        }
+      }
+
+      // Trigger calculation
+      recalcLine(select);
+    }
+
+    /**
+     * Enhanced validation before saving sales order
+     */
+    function validateSalesOrderStock(lines) {
+      const errors = [];
+      
+      lines.forEach((line, index) => {
+        const itemName = line.querySelector('.item-select').value;
+        const qtySold = parseInt(line.querySelector('.qty-sold').value) || 0;
+        const maxQty = parseInt(line.querySelector('.qty-sold').getAttribute('max')) || 0;
+        
+        if (qtySold > maxQty) {
+          errors.push(`Line ${index + 1}: Cannot sell ${qtySold} of "${itemName}" - Max: ${maxQty}`);
+        }
+        
+        if (qtySold <= 0) {
+          errors.push(`Line ${index + 1}: Quantity must be greater than 0 for "${itemName}"`);
+        }
+      });
+      
+      return errors;
+    }
+
+    function removeSOLine(button) {
+      const row = button.closest('tr');
+      row.remove();
+    }
+
+    /* === Recalc One Line === */
+    function recalcLine(input) {
+      const row = input.closest('tr');
+      
+      // Parse formatted numbers back to actual numbers
+      const qty = parseFormattedNumber(row.querySelector('.qty-sold').value) || 0;
+      const up = parseFormattedNumber(row.querySelector('.unit-price').value) || 0;
+      const ship = parseFormattedNumber(row.querySelector('.shipping-fees').value) || 0;
+      
+      const total = (qty * up) + ship;
+      
+      row.querySelector('.total-sales-price').innerText = formatNumberWithCommas(total);
+      
+      // Also update the overall balance
+      calculateSOBalance();
+    }
+
+    /* === Save New SO === */
+    function saveNewSO() {
+      // Check add permission
+      if (!checkSalesPermissionClient('canAdd')) {
+        return;
+      }
+      
+      const date   = document.getElementById('soNewDate').value;
+      const soID   = document.getElementById('soNewSOID').value;
+      const custID = document.getElementById('soNewCustID').value;
+      const custNm = $('#soNewCustomer').val();
+      const state  = document.getElementById('soNewState').value;
+      const city   = document.getElementById('soNewCity').value;      
+      const amountReceived = parseFloat(document.getElementById('soAmountReceived').value) || 0;
+      const paymentMode = document.getElementById('soPaymentMode').value;
+      
+      if (!date || !soID || !custID || !custNm) {
+        alert('Please fill all required fields');
+        return;
+      }
+      
+      if (!paymentMode) {
+        alert('Please select a payment mode');
+        return;
+      }
+      
+      const lines = document.querySelectorAll('#soNewLines tr');
+      
+      // Validate stock before proceeding
+      const stockErrors = validateSalesOrderStock(lines);
+      if (stockErrors.length > 0) {
+        alert('Stock validation errors:\n\n' + stockErrors.join('\n'));
+        return;
+      }
+      
+      const lineData = [];
+      lines.forEach(tr => {
+        const salesDetailID = tr.cells[0].textContent;
+        
+        const row = {
+          'Sales Order Date': date, 
+          'Sales Order ID': soID, 
+          'Sales Detail ID': salesDetailID,
+          'Customer Name': custNm,
+          'State': state, 
+          'City': city,           
+          'Item ID': tr.querySelector('.item-id').textContent,
+          'Item Type': tr.querySelector('.item-type').textContent,
+          'Item Category': tr.querySelector('.item-category').textContent,          
+          'Item Name': tr.querySelector('.item-select').value,
+          'Quantity Sold': parseInt(parseFormattedNumber(tr.querySelector('.qty-sold').value)) || 0,
+          'Unit Price': parseFormattedNumber(tr.querySelector('.unit-price').value) || 0,      
+          'Shipping Fee': parseFormattedNumber(tr.querySelector('.shipping-fees').value) || 0,
+          'Total Sales Price': parseFormattedNumber(tr.querySelector('.total-sales-price').textContent) || 0
+        };
+        lineData.push(row);
+      });
+      
+      if (!lineData.length) { 
+        alert('Add at least one line'); 
+        return; 
+      }
+
+      // Calculate payment status
+      const totals = calculateSOBalance();
+      let paymentStatus = 'Unpaid';
+      if (totals.amountReceived === 0) {
+        paymentStatus = 'Unpaid';
+      } else if (totals.amountReceived === totals.totalSalesAmount) {
+        paymentStatus = 'Paid';
+      } else if (totals.amountReceived > 0 && totals.amountReceived < totals.totalSalesAmount) {
+        paymentStatus = 'Partial';
+      }
+
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(() => {
+          alert('New Sales Order Created');
+          closeNewSOModal();
+          soRefreshSOList();
+          hideProcessing();
+        })
+        .withFailureHandler((error) => {
+          hideProcessing();
+          console.error('Error saving sales order:', error);
+          alert('Error saving sales order: ' + error.message);
+        })
+        .soSaveNewSO(sessionToken, { 
+          master: { 
+            date, 
+            soID, 
+            custID, 
+            custNm, 
+            state, 
+            city, 
+            amountReceived, 
+            paymentMode, 
+            paymentStatus 
+          }, 
+          details: lineData 
+        });
+    }
+
+    /* === View / Edit SO Details === */
+    function openSODetails(soID) {
+      // Check view permission
+      if (!checkSalesPermissionClient('canView')) {
+        return;
+      }
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(data) {
+          const master = data.master;
+          const details = data.details;
+          
+          let html = `
+          <div class="form-section">
+            <h3>Sales Order Details: ${soID}</h3>
+            
+            <!-- Sales Order Header Information -->
+            <div class="form-grid" style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 6px;">
+              <div class="form-group">
+                <label><strong>Customer:</strong></label>
+                <div>${master['Customer Name'] || ''} (${master['Customer ID'] || ''})</div>
+              </div>
+              <div class="form-group">
+                <label><strong>Date:</strong></label>
+                <div>${master['Sales Order Date'] || ''}</div>
+              </div>
+              <div class="form-group">
+                <label><strong>Total Amount:</strong></label>
+                <div>${parseFloat(master['Total Sales Order Amount'] || 0).toFixed(2)}</div>
+              </div>
+              <div class="form-group">
+                <label><strong>Payment Mode:</strong></label>
+                <div>${master['Payment Mode'] || 'Pending'}</div>
+              </div>
+              <div class="form-group">
+                <label><strong>Payment Status:</strong></label>
+                <div>${master['Payment Status'] || 'Pending'}</div>
+              </div>
+              <div class="form-group">
+                <label><strong>Amount Received:</strong></label>
+                <div id="soDetailsAmountReceivedDisplay">${parseFloat(master['Total Received'] || 0).toFixed(2)}</div>
+                <input type="number" id="soDetailsAmountReceivedEdit" class="form-control" 
+                      style="display: none; margin-top: 5px;" 
+                      min="0" step="0.01" 
+                      value="${parseFloat(master['Total Received'] || 0).toFixed(2)}">
+              </div>
+            </div>
+
+            <div class="items-table-container">
+              <table id="soDetailsTable" class="items-table">
+                <thead>
+                  <tr>
+                    <!-- REMOVED: Date, Sales Order ID, Customer Name -->
+                    <th>Sales Detail ID</th>
+                    <th>State</th>
+                    <th>City</th>                    
+                    <th>Item ID</th>
+                    <th>Item Type</th>
+                    <th>Item Category</th>                    
+                    <th>Item Name</th>
+                    <th>Quantity Sold</th>
+                    <th>Unit Price</th>            
+                    <th>Shipping Fee</th>
+                    <th>Total Sales Price</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+          `;
+          
+          details.forEach(detail => {
+            html += `
+              <tr data-detail-id="${detail['Sales Detail ID']}">
+                  <!-- REMOVED: Date, Sales Order ID, Customer Name cells -->
+                  <td>${detail['Sales Detail ID']}</td>
+                  <td>${detail['State']}</td>
+                  <td>${detail['City']}</td>
+                  <td class="item-id">${detail['Item ID']}</td>
+                  <td class="item-type">${detail['Item Type']}</td>
+                  <td class="item-category">${detail['Item Category']}</td>
+                  <td class="item-name">${detail['Item Name']}</td>
+                  <td class="qty-sold">${detail['Quantity Sold'] || 0}</td>
+                  <td class="unit-price">${detail['Unit Price'] ? parseFloat(detail['Unit Price']).toFixed(2) : '0.00'}</td>        
+                  <td class="shipping-fees">${detail['Shipping Fee'] ? parseFloat(detail['Shipping Fee']).toFixed(2) : '0.00'}</td>
+                  <td class="total-sales-price">${detail['Total Sales Price'] ? parseFloat(detail['Total Sales Price']).toFixed(2) : '0.00'}</td>
+                  <td class="actions-cell">
+                      ${salesPermissions.canDelete ? `
+                      <button class="action-btn delete-btn"
+                              onclick="deleteDetail('${detail['Sales Detail ID']}', '${soID}')">
+                          <i class="fas fa-trash"></i> Delete
+                      </button>` : ''}
+                  </td>
+              </tr>
+              `;
+          });
+              
+          html += `
+                  </tbody>
+                </table>
+              </div>
+              <div class="modal-footer" style="text-align:right; margin-top:10px;">
+                <button class="btn btn-outline" onclick="closeSODetailsModal()" style="margin-right: auto;">
+                  <i class="fas fa-times"></i> Close
+                </button>
+                <button class="btn btn-primary" onclick="printSOReceipt()">
+                  <i class="fas fa-print"></i> Print Receipt
+                </button>
+                ${salesPermissions.canEdit ? `
+                <button id="soEditAllBtn" class="btn btn-secondary" onclick="soEnableEditMode('${soID}')">
+                  <i class="fas fa-edit"></i> Edit
+                </button>
+                <button id="soSaveAllBtn" class="btn btn-primary" style="display:none" onclick="soSaveSODetails('${soID}')">
+                  <i class="fas fa-save"></i> Update
+                </button>
+                <button id="soCancelAllBtn" class="btn btn-outline" style="display:none" onclick="soCancelEditMode('${soID}')">
+                  <i class="fas fa-times"></i> Cancel
+                </button>` : ''}
+              </div>
+            </div>
+          `;
+          
+          document.getElementById('soDetailsContent').innerHTML = html;
+          document.getElementById('soDetailsModal').style.display = 'block';
+          hideProcessing();
+        })
+        .withFailureHandler(function(err){
+          hideProcessing();
+          alert("Error loading Sales Order details: " + err.message);
+        })
+        .soGetSODetailsWithMaster(sessionToken, soID);
+    }
+
+    /* === Edit Mode Functions === */
+    function soEnableEditMode(soID) {
+      // Check edit permission
+      if (!checkSalesPermissionClient('canEdit')) {
+        return;
+      }
+      
+      const table = document.getElementById('soDetailsTable');
+      const rows = table.querySelectorAll('tbody tr');
+      
+      // Amount Received field
+      document.getElementById('soDetailsAmountReceivedDisplay').style.display = 'none';
+      document.getElementById('soDetailsAmountReceivedEdit').style.display = 'block';
+      
+      const amountReceivedInput = document.getElementById('soDetailsAmountReceivedEdit');
+      amountReceivedInput.type = 'number';
+      amountReceivedInput.step = '0.01';
+      amountReceivedInput.min = '0';
+      amountReceivedInput.className = 'form-control';
+      
+      const currentValue = parseFormattedNumber(amountReceivedInput.value) || 0;
+      amountReceivedInput.value = currentValue;
+      
+      // Process each row
+      rows.forEach(row => {        
+        const qtySoldCell = row.querySelector('.qty-sold');
+        const unitPriceCell = row.querySelector('.unit-price');
+        const shippingFeesCell = row.querySelector('.shipping-fees');
+        const itemNameCell = row.querySelector('.item-name'); // NEW: Get item name cell
+        
+        // Get current raw values
+        const qtyValue = parseFormattedNumber(qtySoldCell.textContent) || 0;
+        const unitPriceValue = parseFormattedNumber(unitPriceCell.textContent) || 0;
+        const shippingValue = parseFormattedNumber(shippingFeesCell.textContent) || 0;
+        const currentItemName = itemNameCell.textContent; // NEW: Get current item name
+        
+        // Quantity, Unit Price, Shipping (existing)
+        qtySoldCell.innerHTML = `<input type="number" class="form-control edit-qty-sold" value="${qtyValue}" min="1" step="1" onchange="soRecalcDetailRow(this.closest('tr'))">`;
+        unitPriceCell.innerHTML = `<input type="number" class="form-control edit-unit-price" value="${unitPriceValue}" min="0.01" step="0.01" onchange="soRecalcDetailRow(this.closest('tr'))">`;
+        shippingFeesCell.innerHTML = `<input type="number" class="form-control edit-shipping-fees" value="${shippingValue}" min="0" step="0.01" onchange="soRecalcDetailRow(this.closest('tr'))">`;
+        
+        // NEW: Make Item Name editable dropdown (like Purchase system)
+        itemNameCell.innerHTML = `<select class="form-control edit-item-select" onchange="soEditItemChanged(this)">
+          <option value="">Select Item</option>
+          ${soInventory.map(item => 
+            `<option value="${item['Item Name']}" ${item['Item Name'] === currentItemName ? 'selected' : ''}>
+              ${item['Item Name']}
+            </option>`
+          ).join('')}
+        </select>`;
+      });
+      
+      // Show/hide buttons
+      document.getElementById('soEditAllBtn').style.display = 'none';
+      document.getElementById('soSaveAllBtn').style.display = 'inline-block';
+      document.getElementById('soCancelAllBtn').style.display = 'inline-block';
+    }
+
+    /* NEW: Handle item selection change in edit mode (like Purchase system) */
+    function soEditItemChanged(select) {
+      const row = select.closest('tr');
+      const itemName = select.value;
+
+      if (!itemName) {
+        // Clear item details if no item selected
+        row.querySelector('.item-id').textContent = '';
+        row.querySelector('.item-type').textContent = '';
+        row.querySelector('.item-category').textContent = '';
+        return;
+      }
+
+      // Find the selected item in inventory
+      const item = soInventory.find(i => i['Item Name'] === itemName);
+      if (item) {
+        // Update item details automatically
+        row.querySelector('.item-id').textContent = item['Item ID'];
+        row.querySelector('.item-type').textContent = item['Item Type'];
+        row.querySelector('.item-category').textContent = item['Item Category'];
+        
+        // Update maximum quantity based on Remaining Quantity
+        const remainingQty = item['Remaining Quantity'] || 0;
+        const qtyInput = row.querySelector('.edit-qty-sold');
+        qtyInput.setAttribute('max', remainingQty);
+        qtyInput.setAttribute('title', `Max Available: ${remainingQty}`);
+        
+        // Show max quantity information
+        if (remainingQty === 0) {
+          qtyInput.placeholder = 'Out of stock';
+          qtyInput.disabled = true;
+        } else {
+          qtyInput.placeholder = `Max: ${remainingQty}`;
+          qtyInput.disabled = false;
+        }
+      }
+    }
+
+    function soEnableEditMode(soID) {
+      // Check edit permission
+      if (!checkSalesPermissionClient('canEdit')) {
+        return;
+      }
+      
+      const table = document.getElementById('soDetailsTable');
+      const rows = table.querySelectorAll('tbody tr');
+      
+      // Amount Received field
+      document.getElementById('soDetailsAmountReceivedDisplay').style.display = 'none';
+      document.getElementById('soDetailsAmountReceivedEdit').style.display = 'block';
+      
+      const amountReceivedInput = document.getElementById('soDetailsAmountReceivedEdit');
+      amountReceivedInput.type = 'number';
+      amountReceivedInput.step = '0.01';
+      amountReceivedInput.min = '0';
+      amountReceivedInput.className = 'form-control';
+      
+      const currentValue = parseFormattedNumber(amountReceivedInput.value) || 0;
+      amountReceivedInput.value = currentValue;
+      
+      // Process each row
+      rows.forEach(row => {        
+        const qtySoldCell = row.querySelector('.qty-sold');
+        const unitPriceCell = row.querySelector('.unit-price');
+        const shippingFeesCell = row.querySelector('.shipping-fees');
+        const itemNameCell = row.querySelector('.item-name');
+        
+        // Get current raw values
+        const qtyValue = parseFormattedNumber(qtySoldCell.textContent) || 0;
+        const unitPriceValue = parseFormattedNumber(unitPriceCell.textContent) || 0;
+        const shippingValue = parseFormattedNumber(shippingFeesCell.textContent) || 0;
+        const currentItemName = itemNameCell.textContent;
+        
+        // Quantity, Unit Price, Shipping
+        qtySoldCell.innerHTML = `<input type="number" class="form-control edit-qty-sold" value="${qtyValue}" min="1" step="1" onchange="soRecalcDetailRow(this.closest('tr'))">`;
+        unitPriceCell.innerHTML = `<input type="number" class="form-control edit-unit-price" value="${unitPriceValue}" min="0.01" step="0.01" onchange="soRecalcDetailRow(this.closest('tr'))">`;
+        shippingFeesCell.innerHTML = `<input type="number" class="form-control edit-shipping-fees" value="${shippingValue}" min="0" step="0.01" onchange="soRecalcDetailRow(this.closest('tr'))">`;
+        
+        // Item Name editable dropdown
+        itemNameCell.innerHTML = `<select class="form-control edit-item-select" onchange="soEditItemChanged(this)">
+          <option value="">Select Item</option>
+          ${soInventory.map(item => 
+            `<option value="${item['Item Name']}" ${item['Item Name'] === currentItemName ? 'selected' : ''}>
+              ${item['Item Name']}
+            </option>`
+          ).join('')}
+        </select>`;
+        
+        // Initialize stock validation for current item
+        const currentItem = soInventory.find(i => i['Item Name'] === currentItemName);
+        if (currentItem) {
+          const remainingQty = currentItem['Remaining Quantity'] || 0;
+          const qtyInput = row.querySelector('.edit-qty-sold');
+          qtyInput.setAttribute('max', remainingQty);
+          qtyInput.setAttribute('title', `Max Available: ${remainingQty}`);
+          
+          if (remainingQty === 0) {
+            qtyInput.placeholder = 'Out of stock';
+            qtyInput.disabled = true;
+          } else {
+            qtyInput.placeholder = `Max: ${remainingQty}`; // CHANGED: Show as "Max: Quantity"
+            qtyInput.disabled = false;
+          }
+        }
+      });
+      
+      // Show/hide buttons
+      document.getElementById('soEditAllBtn').style.display = 'none';
+      document.getElementById('soSaveAllBtn').style.display = 'inline-block';
+      document.getElementById('soCancelAllBtn').style.display = 'inline-block';
+    }
+
+  
+
+    /* === New Input Handlers === */
+    function handleQtyInput(input) {
+      // Allow only numbers
+      input.value = input.value.replace(/[^0-9]/g, '');
+      soRecalcDetailRow(input.closest('tr'));
+    }
+
+    function handlePriceInput(input) {
+      // Allow numbers and decimal point
+      input.value = input.value.replace(/[^0-9.]/g, '');
+      
+      // Format with commas in real-time
+      const rawValue = input.value.replace(/,/g, '');
+      const number = parseFloat(rawValue);
+      if (!isNaN(number)) {
+        input.value = formatNumberWithCommas(number);
+      }
+      
+      soRecalcDetailRow(input.closest('tr'));
+    }
+
+    /* === Updated Recalc Function === */
+    function soRecalcDetailRow(row) {
+      const qtySold = parseFloat(row.querySelector('.edit-qty-sold').value) || 0;
+      const unitPrice = parseFloat(row.querySelector('.edit-unit-price').value) || 0;
+      const shippingFees = parseFloat(row.querySelector('.edit-shipping-fees').value) || 0;
+      
+      const totalSalesPrice = (qtySold * unitPrice) + shippingFees;
+      
+      // Update calculated field with formatting (only for display)
+      row.querySelector('.total-sales-price').textContent = formatNumberWithCommas(totalSalesPrice);
+    }
+
+    function soCancelEditMode(soID) {
+      // Reload the details to reset changes
+      closeSODetailsModal();
+      openSODetails(soID);
+    }
+
+    function soRecalcDetailRow(row) {
+      const qtySold = parseFormattedNumber(row.querySelector('.edit-qty-sold').value) || 0;
+      const unitPrice = parseFormattedNumber(row.querySelector('.edit-unit-price').value) || 0;
+      const shippingFees = parseFormattedNumber(row.querySelector('.edit-shipping-fees').value) || 0;
+      
+      // SIMPLIFIED CALCULATION: (qty * price) + shipping
+      const totalSalesPrice = (qtySold * unitPrice) + shippingFees;
+      
+      // Update calculated field with formatting
+      row.querySelector('.total-sales-price').textContent = formatNumberWithCommas(totalSalesPrice);
+    }
+
+    function soSaveSODetails(soID) {
+      // Check edit permission
+      if (!checkSalesPermissionClient('canEdit')) {
+        return;
+      }
+      
+      showProcessing();
+      
+      const table = document.getElementById('soDetailsTable');
+      const rows = table.querySelectorAll('tbody tr');
+      const updatedDetails = [];
+      
+      const updatedAmountReceived = parseFormattedNumber(document.getElementById('soDetailsAmountReceivedEdit').value) || 0;
+      
+      // NEW: Validate stock before saving
+      const stockErrors = [];
+      
+      rows.forEach((row, index) => {
+        const detailId = row.getAttribute('data-detail-id');
+        const itemSelect = row.querySelector('.edit-item-select');
+        const newItemName = itemSelect ? itemSelect.value : row.querySelector('.item-name').textContent;
+        const qtySold = parseFormattedNumber(row.querySelector('.edit-qty-sold').value) || 0;
+        const unitPrice = parseFormattedNumber(row.querySelector('.edit-unit-price').value) || 0;
+        const shippingFees = parseFormattedNumber(row.querySelector('.edit-shipping-fees').value) || 0;
+        
+        // NEW: Stock validation
+        if (newItemName) {
+          const item = soInventory.find(i => i['Item Name'] === newItemName);
+          if (item) {
+            const remainingQty = item['Remaining Quantity'] || 0;
+            if (qtySold > remainingQty) {
+              stockErrors.push(`Line ${index + 1}: Cannot sell ${qtySold} of "${newItemName}" - Max: ${remainingQty}`);
+            }
+          }
+        }
+        
+        const newItemId = row.querySelector('.item-id').textContent;
+        const newItemType = row.querySelector('.item-type').textContent;
+        const newItemCategory = row.querySelector('.item-category').textContent;
+        const totalSalesPrice = (qtySold * unitPrice) + shippingFees;
+        
+        updatedDetails.push({
+          'Sales Detail ID': detailId,
+          'Item ID': newItemId,
+          'Item Type': newItemType,
+          'Item Category': newItemCategory,
+          'Item Name': newItemName,
+          'Quantity Sold': qtySold,
+          'Unit Price': unitPrice,
+          'Shipping Fee': shippingFees,
+          'Total Sales Price': totalSalesPrice
+        });
+      });
+      
+      //Check for stock errors before proceeding
+      if (stockErrors.length > 0) {
+        hideProcessing();
+        alert('Stock validation errors:\n\n' + stockErrors.join('\n'));
+        return;
+      }
+      
+      google.script.run
+        .withSuccessHandler(function() {
+          hideProcessing();
+          alert('Sales Order details updated successfully!');          
+          refreshSODetails(soID);
+          soRefreshSOList();
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          alert('Error updating Sales Order details: ' + error.message);
+        })
+        .soUpdateSODetails(sessionToken, updatedDetails, soID, updatedAmountReceived);
+    }
+
+    // Close Sales Order details modal
+    function closeSODetailsModal() {
+      document.getElementById('soDetailsModal').style.display = 'none';
+    }
+
+    function deleteDetail(detailId, soId) {
+      // Check delete permission
+      if (!checkSalesPermissionClient('canDelete')) {
+        return;
+      }
+      
+      if (!confirm('Delete this sales order item?')) return;
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(() => {
+          hideProcessing();
+          // Instead of closing modal, refresh the details content while keeping modal open
+          refreshSODetails(soId);
+        })
+        .withFailureHandler((error) => {
+          hideProcessing();
+          console.error('Delete failed:', error);
+          alert('Delete failed: ' + error.message);
+        })
+        .soDeleteSalesDetail(sessionToken, detailId, soId);
+    }
+
+    /**
+     * Refresh sales order details without closing modal
+     */
+    function refreshSODetails(soID) {
+      // Check view permission
+      if (!checkSalesPermissionClient('canView')) {
+        return;
+      }
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(data) {
+          const master = data.master;
+          const details = data.details;
+          
+          let html = `
+          <div class="form-section">
+            <h3>Sales Order Details: ${soID}</h3>
+            
+            <!-- Sales Order Header Information -->
+            <div class="form-grid" style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 6px;">
+              <div class="form-group">
+                <label><strong>Customer:</strong></label>
+                <div>${master['Customer Name'] || ''} (${master['Customer ID'] || ''})</div>
+              </div>
+              <div class="form-group">
+                <label><strong>Date:</strong></label>
+                <div>${master['Sales Order Date'] || ''}</div>
+              </div>
+              <div class="form-group">
+                <label><strong>Total Amount:</strong></label>
+                <div>${parseFloat(master['Total Sales Order Amount'] || 0).toFixed(2)}</div>
+              </div>
+              <div class="form-group">
+                <label><strong>Payment Mode:</strong></label>
+                <div>${master['Payment Mode'] || 'Pending'}</div>
+              </div>
+              <div class="form-group">
+                <label><strong>Payment Status:</strong></label>
+                <div>${master['Payment Status'] || 'Pending'}</div>
+              </div>
+              <div class="form-group">
+                <label><strong>Amount Received:</strong></label>
+                <div id="soDetailsAmountReceivedDisplay">${parseFloat(master['Total Received'] || 0).toFixed(2)}</div>
+                <input type="number" id="soDetailsAmountReceivedEdit" class="form-control" 
+                      style="display: none; margin-top: 5px;" 
+                      min="0" step="0.01" 
+                      value="${parseFloat(master['Total Received'] || 0).toFixed(2)}">
+              </div>
+            </div>
+
+            <div class="items-table-container">
+              <table id="soDetailsTable" class="items-table">
+                <thead>
+                  <tr>
+                    <th>Sales Detail ID</th>
+                    <th>State</th>
+                    <th>City</th>                    
+                    <th>Item ID</th>
+                    <th>Item Type</th>
+                    <th>Item Category</th>                    
+                    <th>Item Name</th>
+                    <th>Quantity Sold</th>
+                    <th>Unit Price</th>            
+                    <th>Shipping Fee</th>
+                    <th>Total Sales Price</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+          `;
+          
+          details.forEach(detail => {
+            html += `
+              <tr data-detail-id="${detail['Sales Detail ID']}">
+                  <td>${detail['Sales Detail ID']}</td>
+                  <td>${detail['State']}</td>
+                  <td>${detail['City']}</td>
+                  <td class="item-id">${detail['Item ID']}</td>
+                  <td class="item-type">${detail['Item Type']}</td>
+                  <td class="item-category">${detail['Item Category']}</td>
+                  <td class="item-name">${detail['Item Name']}</td>
+                  <td class="qty-sold">${detail['Quantity Sold'] || 0}</td>
+                  <td class="unit-price">${detail['Unit Price'] ? parseFloat(detail['Unit Price']).toFixed(2) : '0.00'}</td>        
+                  <td class="shipping-fees">${detail['Shipping Fee'] ? parseFloat(detail['Shipping Fee']).toFixed(2) : '0.00'}</td>
+                  <td class="total-sales-price">${detail['Total Sales Price'] ? parseFloat(detail['Total Sales Price']).toFixed(2) : '0.00'}</td>
+                  <td class="actions-cell">
+                      ${salesPermissions.canDelete ? `
+                      <button class="action-btn delete-btn"
+                              onclick="deleteDetail('${detail['Sales Detail ID']}', '${soID}')">
+                          <i class="fas fa-trash"></i> Delete
+                      </button>` : ''}
+                  </td>
+              </tr>
+              `;
+          });
+              
+          html += `
+                  </tbody>
+                </table>
+              </div>
+              <div class="modal-footer" style="text-align:right; margin-top:10px;">
+                <button class="btn btn-outline" onclick="closeSODetailsModal()" style="margin-right: auto;">
+                  <i class="fas fa-times"></i> Close
+                </button>
+                <button class="btn btn-primary" onclick="printSOReceipt()">
+                  <i class="fas fa-print"></i> Print Receipt
+                </button>
+                ${salesPermissions.canEdit ? `
+                <button id="soEditAllBtn" class="btn btn-secondary" onclick="soEnableEditMode('${soID}')">
+                  <i class="fas fa-edit"></i> Edit
+                </button>
+                <button id="soSaveAllBtn" class="btn btn-primary" style="display:none" onclick="soSaveSODetails('${soID}')">
+                  <i class="fas fa-save"></i> Update
+                </button>
+                <button id="soCancelAllBtn" class="btn btn-outline" style="display:none" onclick="soCancelEditMode('${soID}')">
+                  <i class="fas fa-times"></i> Cancel
+                </button>` : ''}
+              </div>
+            </div>
+          `;
+          
+          document.getElementById('soDetailsContent').innerHTML = html;
+          hideProcessing();
+          
+          // Show success message
+          // alert('Sales order item deleted successfully!');
+        })
+        .withFailureHandler(function(err){
+          hideProcessing();
+          alert("Error refreshing Sales Order details: " + err.message);
+        })
+        .soGetSODetailsWithMaster(sessionToken, soID);
+    }
+
+    /* === Delete Entire Sales Order === */
+    function deleteSalesOrder(soID) {
+      // Check delete permission
+      if (!checkSalesPermissionClient('canDelete')) {
+        return;
+      }
+      
+      if (!confirm(`Are you sure you want to delete Sales Order: ${soID}?\n\nThis will permanently delete:\n• The sales order record\n• All line items\n• Associated payment records\n\nThis action cannot be undone.`)) {
+        return;
+      }
+
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(() => {
+          hideProcessing();
+          alert(`Sales Order ${soID} deleted successfully!`);
+          soRefreshSOList();
+        })
+        .withFailureHandler((error) => {
+          hideProcessing();
+          console.error('Delete sales order failed:', error);
+          alert('Error deleting sales order: ' + error.message);
+        })
+        .soDeleteEntireSalesOrder(sessionToken, soID);
+    }
+
+    /* === Enhanced Receipt Functions === */
+    function printSOReceipt() {
+      // Get the current sales order data from the details modal
+      const soDetailsContent = document.getElementById('soDetailsContent');
+      
+      // Extract data from the displayed details
+      const soID = soDetailsContent.querySelector('h3')?.textContent.replace('Sales Order Details: ', '') || 'N/A';
+      const customerInfo = soDetailsContent.querySelector('.form-group:first-child div')?.textContent || 'N/A';
+      const date = soDetailsContent.querySelectorAll('.form-group div')[1]?.textContent || 'N/A';
+      const totalAmount = soDetailsContent.querySelectorAll('.form-group div')[2]?.textContent || '0.00';
+      const paymentMode = soDetailsContent.querySelectorAll('.form-group div')[3]?.textContent || 'N/A';
+      const paymentStatus = soDetailsContent.querySelectorAll('.form-group div')[4]?.textContent || 'N/A';
+      const amountReceived = soDetailsContent.querySelectorAll('.form-group div')[5]?.textContent || '0.00';
+
+      // Extract line items from the table
+      const itemsTable = soDetailsContent.querySelector('#soDetailsTable');
+      const lineItems = [];
+      
+      if (itemsTable) {
+        const rows = itemsTable.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td');
+          if (cells.length >= 10) {
+            const item = {
+              name: cells[6]?.textContent || 'N/A',
+              qty: cells[7]?.textContent || '0',
+              price: cells[8]?.textContent || '0.00',
+              shipping: cells[9]?.textContent || '0.00',
+              total: cells[10]?.textContent || '0.00'
+            };
+            lineItems.push(item);
+          }
+        });
+      }
+
+      // Calculate balance
+      const total = parseFloat(totalAmount) || 0;
+      const received = parseFloat(amountReceived) || 0;
+      const balance = (total - received).toFixed(2);
+
+      // Generate receipt HTML
+      const receiptHTML = generateReceiptHTML({
+        soID,
+        customerInfo,
+        date,
+        totalAmount,
+        paymentMode,
+        paymentStatus,
+        amountReceived,
+        lineItems,
+        balance
+      });
+
+      // Display in receipt modal
+      document.getElementById('soReceiptContent').innerHTML = receiptHTML;
+      document.getElementById('soReceiptModal').style.display = 'block';
+    }
+    
+    function generateReceiptHTML(data) {
+      // Format the amounts with commas
+      const formattedTotalAmount = formatNumberWithCommas(data.totalAmount);
+      const formattedAmountReceived = formatNumberWithCommas(data.amountReceived);
+      const formattedBalance = formatNumberWithCommas(data.balance);
+      
+      return `
+        <div class="receipt-content">
+          <!-- Company Header -->
+          <div class="receipt-header">
+            <div class="receipt-company">
+              <h1>YOUR COMPANY NAME</h1>
+              <p>123 Business Street, City, State 12345</p>
+              <p>Phone: (555) 123-4567 | Email: info@yourcompany.com</p>
+            </div>
+            <div class="receipt-title">SALES ORDER RECEIPT</div>
+          </div>
+
+          <!-- Order Details -->
+          <div class="receipt-details-grid">
+            <div class="receipt-detail-group">
+              <p><span class="receipt-detail-label">Receipt No:</span> ${data.soID}</p>
+              <p><span class="receipt-detail-label">Date:</span> ${data.date}</p>
+              <p><span class="receipt-detail-label">Customer:</span> ${data.customerInfo}</p>
+            </div>
+            <div class="receipt-detail-group">
+              <p><span class="receipt-detail-label">Payment Mode:</span> ${data.paymentMode}</p>
+              <p><span class="receipt-detail-label">Status:</span> ${data.paymentStatus}</p>
+              <p><span class="receipt-detail-label">Issued Date:</span> ${new Date().toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          <!-- Items Table -->
+          <table class="receipt-items-table">
+            <thead>
+              <tr>
+                <th>Item Description</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Shipping</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.lineItems.map(item => `
+                <tr>
+                  <td>${item.name}</td>
+                  <td>${item.qty}</td>
+                  <td>₦${formatNumberWithCommas(item.price)}</td>
+                  <td>₦${formatNumberWithCommas(item.shipping)}</td>
+                  <td>₦${formatNumberWithCommas(item.total)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <!-- Totals Section -->
+          <div class="receipt-totals">
+            <div class="receipt-total-row subtotal">
+              <span>Subtotal:</span>
+              <span class="receipt-total-amount">₦${formattedTotalAmount}</span>
+            </div>
+            <div class="receipt-total-row">
+              <span>Amount Paid:</span>
+              <span class="receipt-total-amount">₦${formattedAmountReceived}</span>
+            </div>
+            <div class="receipt-total-row balance">
+              <span>Balance Due:</span>
+              <span class="receipt-total-amount">₦${formattedBalance}</span>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="receipt-footer">
+            <div class="receipt-thank-you">Thank you for your business!</div>
+            <p>For any questions regarding this receipt, please contact our customer service.</p>
+            <p>Generated on ${new Date().toLocaleString()}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('soReceiptModal').style.display = 'none';
+    }
+
+    function printReceipt() {
+      window.print();
+    }
+
+    /* === Number Formatting Utility === */
+    function formatNumberWithCommas(number) {
+      if (number === null || number === undefined || isNaN(number)) return '0.00';
+      
+      // Convert to number and fix to 2 decimal places
+      const num = typeof number === 'string' ? parseFloat(number.replace(/,/g, '')) : number;
+      if (isNaN(num)) return '0.00';
+      
+      return num.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function formatNumberInput(input) {
+      // Format number as user types in input fields
+      const value = input.value.replace(/,/g, '');
+      const number = parseFloat(value);
+      
+      if (!isNaN(number)) {
+        input.value = formatNumberWithCommas(number);
+      }
+    }
+
+    function parseFormattedNumber(formattedString) {
+      if (!formattedString) return 0;
+      
+      // Handle both string and number inputs
+      const stringValue = typeof formattedString === 'string' ? formattedString : String(formattedString);
+      
+      // Remove all commas and parse
+      const cleanString = stringValue.replace(/,/g, '');
+      const number = parseFloat(cleanString);
+      
+      return isNaN(number) ? 0 : number;
+    }    
+
+  </script>
+</body>
+</html>

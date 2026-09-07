@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Management</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Poppins:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Select2 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+  
+  <style>    
+    .users-container {
+      font-family: 'Roboto', sans-serif;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      overflow-x: hidden;
+    }
+    
+    .users-header {
+      margin-bottom: 25px;
+      flex-shrink: 0;
+    }
+    
+    .users-header h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .users-header p {
+      color: #7f8c8d;
+      font-size: 1.05rem;
+    }
+    
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    
+    .btn-primary {
+      background-color: #1abc9c;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #16a085;
+    }
+    
+    .btn-secondary {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #2980b9;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #bdc3c7;
+      color: #34495e;
+    }
+    
+    .btn-outline:hover {
+      background-color: #ecf0f1;
+    }
+    
+    .search-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    
+    .search-select {
+      padding: 9px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      background-color: white;
+      flex-shrink: 0;
+    }
+    
+    .search-input {
+      padding: 10px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      width: 250px;
+      flex-shrink: 0;
+    }
+    
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+    
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1300px;
+    }
+    
+    .users-table th {
+      background-color: #2c3e50;
+      color: white;
+      padding: 12px 15px;
+      text-align: left;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .users-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ecf0f1;
+      color: #34495e;
+    }
+    
+    .users-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .users-table .inactive-user {
+      background-color: rgba(189, 195, 199, 0.1);
+      color: #95a5a6;
+    }
+    
+    .users-table .inactive-user td {
+      color: #95a5a6;
+    }
+    
+    .action-cell {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    
+    .action-btn {
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .view-btn {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .edit-btn {
+      background-color: #f39c12;
+      color: white;
+    }
+    
+    .update-btn {
+      background-color: #2ecc71;
+      color: white;
+    }
+    
+    .cancel-btn {
+      background-color: #95a5a6;
+      color: white;
+    }
+    
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .reset-btn {
+      background-color: #9b59b6;
+      color: white;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-align: center;
+      min-width: 70px;
+    }
+    
+    .status-active {
+      background-color: rgba(46, 204, 113, 0.15);
+      color: #27ae60;
+      border: 1px solid #27ae60;
+    }
+    
+    .status-inactive {
+      background-color: rgba(231, 76, 60, 0.15);
+      color: #c0392b;
+      border: 1px solid #c0392b;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      overflow-y: auto;
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 25px;
+      border-radius: 8px;
+      width: 500px;
+      max-width: 90%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .modal-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      color: #2c3e50;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    
+    .close-btn {
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #7f8c8d;
+      background: none;
+      border: none;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .close-btn:hover {
+      background-color: #f8f9fa;
+      border-radius: 50%;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+    }
+    
+    .form-control:focus {
+      border-color: #1abc9c;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+    }
+    
+    .required:after {
+      content: " *";
+      color: #e74c3c;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .form-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #ecf0f1;
+    }
+    
+    .processing-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255,255,255,0.9);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #1abc9c;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .select2-container {
+      width: 100% !important;
+    }
+    
+    .select2-container--default .select2-selection--single {
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      height: 42px;
+      padding: 5px;
+    }
+    
+    .id-generate {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .id-field {
+      flex: 1;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 5px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    .page-btn {
+      padding: 8px 12px;
+      background-color: white;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    
+    .page-btn.active {
+      background-color: #1abc9c;
+      color: white;
+      border-color: #1abc9c;
+    }
+    
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .no-data-container {
+      text-align: center;
+      padding: 50px 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-top: 20px;
+    }
+    
+    .no-data-icon {
+      font-size: 3.5rem;
+      color: #bdc3c7;
+      margin-bottom: 20px;
+    }
+    
+    .no-data-title {
+      color: #7f8c8d;
+      margin-bottom: 10px;
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    .quick-add-btn {
+      background-color: #f39c12;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .quick-add-btn:hover {
+      background-color: #e67e22;
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .input-group .form-control {
+      flex: 1;
+    }
+    
+    .readonly-field {
+      background-color: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      padding: 10px;
+      border-radius: 4px;
+      color: #666;
+    }
+    
+    /* Edit mode styles for inline editing */
+    .edit-inline-input {
+      width: 100%;
+      padding: 6px;
+      border: 2px solid #f39c12;
+      border-radius: 4px;
+      background-color: #fffde7;
+    }
+    
+    .edit-inline-select {
+      width: 100%;
+      padding: 6px;
+      border: 2px solid #f39c12;
+      border-radius: 4px;
+      background-color: #fffde7;
+    }
+  </style>
+</head>
+<body>
+  <div class="users-container">
+    <!-- Header Section -->
+    <div class="users-header">
+      <h1>User Management</h1>
+      <p>Manage system users and their permissions</p>
+    </div>
+    
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="openNewUserModal()">
+          <i class="fas fa-user-plus"></i> Add New User
+        </button>
+        <button class="btn btn-secondary" onclick="refreshUsersList()">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+      
+      <div class="search-group">
+        <select id="searchCriteria" class="search-select">
+          <option value="all">All</option>
+          <option value="email">Email</option>
+          <option value="firstName">First Name</option>
+          <option value="lastName">Last Name</option>
+          <option value="role">Role</option>
+          <option value="department">Department</option>
+          <option value="status">Status</option>
+        </select>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search users...">
+        <button class="btn btn-outline" onclick="applySearch()">
+          <i class="fas fa-search"></i> Search
+        </button>
+        <button class="btn btn-outline" onclick="clearSearch()">
+          <i class="fas fa-times"></i> Clear
+        </button>
+      </div>
+    </div>
+    
+    <!-- Users Table Container -->
+    <div id="usersTableContainer">
+      <div class="table-container">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Email</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Join Date</th>
+              <th>Status</th>
+              <th>Phone</th>
+              <th>Last Login</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="pagination" id="usersPagination">
+        <!-- Pagination buttons will be added here -->
+      </div>
+    </div>
+    
+    <!-- No Data Message -->
+    <div id="usersNoData" class="no-data-container" style="display:none;">
+      <i class="fas fa-user-slash no-data-icon"></i>
+      <h3 class="no-data-title">No users found</h3>
+      <p>Click "Add New User" to add your first user</p>
+    </div>
+  </div>
+  
+  <!-- New User Modal -->
+  <div id="newUserModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add New User</h2>
+        <button class="close-btn" onclick="closeNewUserModal()">&times;</button>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">User ID</label>
+        <div class="id-generate">
+          <input type="text" id="newUserId" class="form-control id-field" readonly>
+          <button class="btn btn-secondary" type="button" onclick="generateUserId()">
+            <i class="fas fa-bolt"></i> Generate
+          </button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Email</label>
+        <input type="email" id="newUserEmail" class="form-control" placeholder="user@example.com" required>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="required">First Name</label>
+          <input type="text" id="newUserFirstName" class="form-control" placeholder="John" required>
+        </div>
+        <div class="form-group">
+          <label class="required">Last Name</label>
+          <input type="text" id="newUserLastName" class="form-control" placeholder="Doe" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Role</label>
+        <div class="input-group">
+          <select id="newUserRole" class="form-control select2-role">
+            <option value="">Select Role</option>
+            <!-- Options will be populated by JavaScript -->
+          </select>
+          <button type="button" class="quick-add-btn" onclick="openQuickAddRoleModal()">
+            <i class="fas fa-plus"></i> Add New
+          </button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Department</label>
+        <div class="input-group">
+          <select id="newUserDepartment" class="form-control select2-dept">
+            <option value="">Select Department</option>
+            <!-- Options will be populated by JavaScript -->
+          </select>
+          <button type="button" class="quick-add-btn" onclick="openQuickAddDeptModal()">
+            <i class="fas fa-plus"></i> Add New
+          </button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Join Date</label>
+        <input type="date" id="newUserJoinDate" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="newUserPhone" class="form-control" placeholder="+1234567890">
+      </div>
+      
+      <div class="form-group">
+        <label>Address</label>
+        <textarea id="newUserAddress" class="form-control" rows="2" placeholder="Enter address"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Status</label>
+        <select id="newUserStatus" class="form-control">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeNewUserModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button class="btn btn-primary" onclick="saveNewUser()">
+          <i class="fas fa-save"></i> Save & Send Invite
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Edit User Modal -->
+  <div id="editUserModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit User</h2>
+        <button class="close-btn" onclick="closeEditUserModal()">&times;</button>
+      </div>
+      
+      <div class="form-group">
+        <label>User ID</label>
+        <div class="readonly-field" id="editUserId"></div>
+      </div>
+      
+      <div class="form-group">
+        <label>Email</label>
+        <div class="readonly-field" id="editUserEmail"></div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="required">First Name</label>
+          <input type="text" id="editUserFirstName" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="required">Last Name</label>
+          <input type="text" id="editUserLastName" class="form-control" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Role</label>
+        <div class="input-group">
+          <select id="editUserRole" class="form-control select2-role-edit">
+            <option value="">Select Role</option>
+            <!-- Options will be populated by JavaScript -->
+          </select>
+          <button type="button" class="quick-add-btn" onclick="openQuickAddRoleModal('edit')">
+            <i class="fas fa-plus"></i> Add New
+          </button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Department</label>
+        <div class="input-group">
+          <select id="editUserDepartment" class="form-control select2-dept-edit">
+            <option value="">Select Department</option>
+            <!-- Options will be populated by JavaScript -->
+          </select>
+          <button type="button" class="quick-add-btn" onclick="openQuickAddDeptModal('edit')">
+            <i class="fas fa-plus"></i> Add New
+          </button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Join Date</label>
+        <input type="date" id="editUserJoinDate" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="editUserPhone" class="form-control" placeholder="+1234567890">
+      </div>
+      
+      <div class="form-group">
+        <label>Address</label>
+        <textarea id="editUserAddress" class="form-control" rows="2" placeholder="Enter address"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Status</label>
+        <select id="editUserStatus" class="form-control">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeEditUserModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button class="btn btn-primary" onclick="saveUserEdits()">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Quick Add Role Modal -->
+  <div id="quickAddRoleModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add New Role</h2>
+        <button class="close-btn" onclick="closeQuickAddRoleModal()">&times;</button>
+      </div>
+      <div class="form-group">
+        <label class="required">New Role Name</label>
+        <input type="text" id="quickAddRole" class="form-control" placeholder="Enter new role name">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeQuickAddRoleModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button class="btn btn-primary" onclick="saveQuickAddRole()">
+          <i class="fas fa-save"></i> Save & Select
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Quick Add Department Modal -->
+  <div id="quickAddDeptModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add New Department</h2>
+        <button class="close-btn" onclick="closeQuickAddDeptModal()">&times;</button>
+      </div>
+      <div class="form-group">
+        <label class="required">New Department Name</label>
+        <input type="text" id="quickAddDepartment" class="form-control" placeholder="Enter new department name">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeQuickAddDeptModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button class="btn btn-primary" onclick="saveQuickAddDept()">
+          <i class="fas fa-save"></i> Save & Select
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Processing Overlay -->
+  <div id="processingOverlay" class="processing-overlay">
+    <div class="spinner"></div>
+    <p>Processing...</p>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+  <script>
+    /* ==================== */
+    /* GLOBAL VARIABLES */
+    /* ==================== */
+    let allUsers = [];
+    let filteredUsers = [];
+    let currentPage = 1;
+    const pageSize = 20;
+    let userRoles = [];
+    let userDepartments = [];
+    let currentUserEmail = '';
+    let currentEditUserId = '';
+    let quickAddMode = 'new';
+
+
+    // ===========================================
+    // PERMISSION VARIABLES AND SETUP
+    // ===========================================
+
+    // Get permissions from window object (set by Template.html)
+    const userPermissions = window.appPermissions?.users || {
+      canView: true,
+      canAdd: true,
+      canEdit: true,
+      canDelete: true
+    };
+
+    const sessionToken = window.appPermissions?.token || '';
+
+    console.log('Users Permissions:', userPermissions);
+
+    // Client-side permission check function
+    function checkUserPermission(action) {
+      if (!userPermissions[action]) {
+        const actionText = action.replace('can', '').toLowerCase();
+        alert(`You do not have permission to ${actionText} users.`);
+        return false;
+      }
+      return true;
+    }
+    
+    /* ==================== */
+    /* INITIALIZATION */
+    /* ==================== */
+    document.addEventListener('DOMContentLoaded', function() {
+    console.log('Users page initializing...');
+    
+    // Setup page based on permissions
+    if (!setupUsersPage()) {
+      console.log('User does not have view permission for users');
+      return;
+    }
+    
+    // Only load data if user has view permission
+    if (userPermissions.canView) {
+      // Get current user from session token
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      
+      if (token) {
+        // Get current user info
+        google.script.run
+          .withSuccessHandler(function(result) {
+            if (result && result.valid) {
+              currentUserEmail = result.user.email;
+              console.log('Current user:', currentUserEmail);
+            }
+          })
+          .getCurrentUser(sessionToken, token);
+      }
+      
+      // Initialize Select2 dropdowns
+      $('#newUserRole').select2({
+        placeholder: 'Select Role',
+        allowClear: true,
+        width: '100%'
+      });
+      
+      $('#newUserDepartment').select2({
+        placeholder: 'Select Department',
+        allowClear: true,
+        width: '100%'
+      });
+      
+      $('#editUserRole').select2({
+        placeholder: 'Select Role',
+        allowClear: true,
+        width: '100%'
+      });
+      
+      $('#editUserDepartment').select2({
+        placeholder: 'Select Department',
+        allowClear: true,
+        width: '100%'
+      });
+      
+      // Load initial data
+      loadRoles();
+      loadDepartments();
+      loadUsers();
+      
+      // Set default date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('newUserJoinDate').value = today;
+    }
+  });
+
+
+  // ===========================================
+  // PAGE SETUP FUNCTION WITH PERMISSIONS
+  // ===========================================
+  function setupUsersPage() {
+    console.log('Setting up users page with permissions:', userPermissions);
+    
+    // Only load data if user has view permission
+    if (!userPermissions.canView) {
+      document.getElementById('usersTableContainer').style.display = 'none';
+      document.getElementById('usersNoData').style.display = 'block';
+      document.getElementById('usersNoData').innerHTML = `
+        <i class="fas fa-ban" style="font-size:3rem; color:#e74c3c; margin-bottom:20px;"></i>
+        <h3 style="color:#e74c3c;">Access Denied</h3>
+        <p>You don't have permission to view users.</p>
+      `;
+      
+      // Hide action buttons
+      document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+        btn.style.display = 'none';
+      });
+      
+      return false;
+    }
+    
+    // Show/hide action buttons based on permissions
+    const addBtn = document.querySelector('button[onclick="openNewUserModal()"]');
+    if (addBtn && !userPermissions.canAdd) {
+      addBtn.style.display = 'none';
+    }
+    
+    return true;
+  }
+    
+    /* ==================== */
+    /* DATA LOADING FUNCTIONS */
+    /* ==================== */
+    function loadUsers() {
+      console.log('Loading users...');
+      showProcessing();
+      
+      google.script.run
+        .withSuccessHandler(function(users) {
+          console.log('Successfully loaded users:', users ? users.length : 0, 'users');
+          
+          if (users && Array.isArray(users)) {
+            allUsers = users;
+            filteredUsers = [...users];
+            currentPage = 1;
+            renderUsersTable();
+          } else {
+            console.error('Invalid users data received:', users);
+            allUsers = [];
+            filteredUsers = [];
+            renderUsersTable();
+          }
+          hideProcessing();
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading users:', error);
+          alert('Error loading users: ' + error.message);
+          allUsers = [];
+          filteredUsers = [];
+          renderUsersTable();
+          hideProcessing();
+        })
+        .getUsers(sessionToken);
+    }
+    
+    function loadRoles() {
+      google.script.run
+        .withSuccessHandler(function(roles) {
+          userRoles = roles || [];
+          populateRoleDropdown('new');
+          populateRoleDropdown('edit');
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading roles:', error);
+          userRoles = [];
+        })
+        .getRoles(sessionToken);
+    }
+    
+    function loadDepartments() {
+      google.script.run
+        .withSuccessHandler(function(departments) {
+          userDepartments = departments || [];
+          populateDepartmentDropdown('new');
+          populateDepartmentDropdown('edit');
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading departments:', error);
+          userDepartments = [];
+        })
+        .getDepartments(sessionToken);
+    }
+    
+    /* ==================== */
+    /* UI RENDERING FUNCTIONS */
+    /* ==================== */
+    function renderUsersTable() {
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const pageUsers = filteredUsers.slice(startIndex, endIndex);
+      const tbody = document.getElementById('usersTableBody');
+      
+      tbody.innerHTML = '';
+      
+      if (filteredUsers.length === 0) {
+        document.getElementById('usersTableContainer').style.display = 'none';
+        document.getElementById('usersNoData').style.display = 'block';
+        document.getElementById('usersPagination').innerHTML = '';
+        return;
+      }
+      
+      document.getElementById('usersTableContainer').style.display = 'block';
+      document.getElementById('usersNoData').style.display = 'none';
+      
+      pageUsers.forEach((user, index) => {
+        const row = document.createElement('tr');
+        if (user.status === 'Inactive') {
+          row.classList.add('inactive-user');
+        }
+        
+        // Format date if available
+        let joinDate = user.joinDate || '';
+        let lastLogin = user.lastLogin || '';
+        
+        // Format dates for display
+        if (joinDate) {
+          joinDate = formatDateForDisplay(joinDate);
+        }
+        
+        if (lastLogin && lastLogin !== 'Never') {
+          lastLogin = formatDateForDisplay(lastLogin);
+        }
+        
+        row.innerHTML = `
+          <td>${user.id || ''}</td>
+          <td>${user.email || ''}</td>
+          <td>${user.firstName || ''}</td>
+          <td>${user.lastName || ''}</td>
+          <td>${user.role || ''}</td>
+          <td>${user.department || ''}</td>
+          <td>${joinDate}</td>
+          <td>
+            <span class="status-badge ${user.status === 'Active' ? 'status-active' : 'status-inactive'}">
+              ${user.status || 'Active'}
+            </span>
+          </td>
+          <td>${user.phone || ''}</td>
+          <td>${lastLogin}</td>
+          <td class="action-cell">
+            <button class="action-btn edit-btn" onclick="openEditUserModal('${user.id}')" title="Edit User">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="action-btn reset-btn" onclick="sendPasswordReset('${user.id}')" title="Send Password Reset">
+              <i class="fas fa-key"></i> Reset
+            </button>
+            <button class="action-btn delete-btn" onclick="deleteUser('${user.id}')" 
+              title="Delete User" ${user.email === currentUserEmail ? 'disabled' : ''}>
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </td>
+        `;
+        
+        tbody.appendChild(row);
+      });
+      
+      renderPagination();
+    }
+    
+    function renderPagination() {
+      const totalPages = Math.ceil(filteredUsers.length / pageSize);
+      const paginationDiv = document.getElementById('usersPagination');
+      paginationDiv.innerHTML = '';
+      
+      if (totalPages <= 1) return;
+      
+      // Previous button
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'page-btn';
+      prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.onclick = () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderUsersTable();
+        }
+      };
+      paginationDiv.appendChild(prevBtn);
+      
+      // Page buttons
+      const maxPagesToShow = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+      let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+      
+      if (endPage - startPage + 1 < maxPagesToShow) {
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => {
+          currentPage = i;
+          renderUsersTable();
+        };
+        paginationDiv.appendChild(pageBtn);
+      }
+      
+      // Next button
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'page-btn';
+      nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderUsersTable();
+        }
+      };
+      paginationDiv.appendChild(nextBtn);
+    }
+    
+    function populateRoleDropdown(mode) {
+      const roleSelect = mode === 'edit' ? $('#editUserRole') : $('#newUserRole');
+      roleSelect.empty();
+      roleSelect.append('<option value="">Select Role</option>');
+      
+      userRoles.forEach(role => {
+        if (role && role.trim() !== '') {
+          roleSelect.append(new Option(role, role));
+        }
+      });
+      
+      roleSelect.trigger('change');
+    }
+    
+    function populateDepartmentDropdown(mode) {
+      const deptSelect = mode === 'edit' ? $('#editUserDepartment') : $('#newUserDepartment');
+      deptSelect.empty();
+      deptSelect.append('<option value="">Select Department</option>');
+      
+      userDepartments.forEach(dept => {
+        if (dept && dept.trim() !== '') {
+          deptSelect.append(new Option(dept, dept));
+        }
+      });
+      
+      deptSelect.trigger('change');
+    }
+    
+    /* ==================== */
+    /* MODAL FUNCTIONS */
+    /* ==================== */
+    function openNewUserModal() {
+      // Check add permission
+      if (!checkUserPermission('canAdd')) {
+        return;
+      }
+      
+      document.getElementById('newUserModal').style.display = 'block';
+      document.getElementById('newUserId').value = '';
+      document.getElementById('newUserEmail').value = '';
+      document.getElementById('newUserFirstName').value = '';
+      document.getElementById('newUserLastName').value = '';
+      document.getElementById('newUserPhone').value = '';
+      document.getElementById('newUserAddress').value = '';
+      document.getElementById('newUserStatus').value = 'Active';
+      $('#newUserRole').val(null).trigger('change');
+      $('#newUserDepartment').val(null).trigger('change');
+      
+      // Set today's date
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('newUserJoinDate').value = today;
+    }
+    
+    function closeNewUserModal() {
+      document.getElementById('newUserModal').style.display = 'none';
+    }
+    
+    function openEditUserModal(userId) {
+      // Check edit permission
+      if (!checkUserPermission('canEdit')) {
+        return;
+      }
+      
+      // Find the user
+      const user = allUsers.find(u => u.id === userId);
+      if (!user) {
+        alert('User not found');
+        return;
+      }
+      
+      currentEditUserId = userId;
+      
+      // Populate the edit form
+      document.getElementById('editUserId').textContent = user.id;
+      document.getElementById('editUserEmail').textContent = user.email;
+      document.getElementById('editUserFirstName').value = user.firstName || '';
+      document.getElementById('editUserLastName').value = user.lastName || '';
+      document.getElementById('editUserPhone').value = user.phone || '';
+      document.getElementById('editUserAddress').value = user.address || '';
+      document.getElementById('editUserStatus').value = user.status || 'Active';
+      
+      // Set join date
+      if (user.joinDate) {
+        const joinDate = new Date(user.joinDate).toISOString().split('T')[0];
+        document.getElementById('editUserJoinDate').value = joinDate;
+      } else {
+        document.getElementById('editUserJoinDate').value = '';
+      }
+      
+      // Set role and department dropdowns
+      $('#editUserRole').val(user.role || '').trigger('change');
+      $('#editUserDepartment').val(user.department || '').trigger('change');
+      
+      // Show the modal
+      document.getElementById('editUserModal').style.display = 'block';
+    }
+    
+    function closeEditUserModal() {
+      document.getElementById('editUserModal').style.display = 'none';
+      currentEditUserId = '';
+    }
+    
+    function openQuickAddRoleModal(mode = 'new') {
+      quickAddMode = mode;
+      document.getElementById('quickAddRoleModal').style.display = 'block';
+      document.getElementById('quickAddRole').value = '';
+      document.getElementById('quickAddRole').focus();
+    }
+    
+    function closeQuickAddRoleModal() {
+      document.getElementById('quickAddRoleModal').style.display = 'none';
+    }
+    
+    function openQuickAddDeptModal(mode = 'new') {
+      quickAddMode = mode;
+      document.getElementById('quickAddDeptModal').style.display = 'block';
+      document.getElementById('quickAddDepartment').value = '';
+      document.getElementById('quickAddDepartment').focus();
+    }
+    
+    function closeQuickAddDeptModal() {
+      document.getElementById('quickAddDeptModal').style.display = 'none';
+    }
+    
+    /* ==================== */
+    /* USER MANAGEMENT FUNCTIONS */
+    /* ==================== */
+    function generateUserId() {
+      // Check add permission
+      if (!checkUserPermission('canAdd')) {
+        return;
+      }
+      
+      const firstName = document.getElementById('newUserFirstName').value.trim();
+      const lastName = document.getElementById('newUserLastName').value.trim();
+      
+      if (!firstName || !lastName) {
+        alert('Please enter first and last name before generating ID');
+        return;
+      }
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(userId) {
+          document.getElementById('newUserId').value = userId;
+          hideProcessing();
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error generating user ID:', error);
+          alert('Error generating user ID: ' + error.message);
+        })
+        .generateUserId(sessionToken, firstName, lastName);
+    }
+    
+    function saveNewUser() {
+      if (!checkUserPermission('canAdd')) {
+        return;
+      }
+      const userId = document.getElementById('newUserId').value.trim();
+      const email = document.getElementById('newUserEmail').value.trim();
+      const firstName = document.getElementById('newUserFirstName').value.trim();
+      const lastName = document.getElementById('newUserLastName').value.trim();
+      const role = $('#newUserRole').val();
+      const department = $('#newUserDepartment').val();
+      const joinDate = document.getElementById('newUserJoinDate').value;
+      const phone = document.getElementById('newUserPhone').value.trim();
+      const address = document.getElementById('newUserAddress').value.trim();
+      const status = document.getElementById('newUserStatus').value;
+      
+      // Validation
+      if (!userId) {
+        alert('Please generate a User ID first');
+        return;
+      }
+      
+      if (!email) {
+        alert('Please enter email address');
+        return;
+      }
+      
+      if (!isValidEmail(email)) {
+        alert('Please enter a valid email address');
+        return;
+      }
+      
+      if (!firstName) {
+        alert('Please enter first name');
+        return;
+      }
+      
+      if (!lastName) {
+        alert('Please enter last name');
+        return;
+      }
+      
+      if (!role) {
+        alert('Please select a role');
+        return;
+      }
+      
+      const userData = {
+        id: userId,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        role: role,
+        department: department || '',
+        joinDate: joinDate || '',
+        phone: phone || '',
+        address: address || '',
+        status: status || 'Active'
+      };
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideProcessing();
+          if (result && result.success) {
+            alert(result.message);
+            closeNewUserModal();
+            // Refresh user list after short delay
+            setTimeout(loadUsers, 1000);
+          } else {
+            alert('Error: ' + (result ? result.message : 'Failed to save user'));
+          }
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error saving user:', error);
+          alert('Error saving user: ' + error.message);
+        })
+        .createUser(sessionToken, userData);
+    }
+    
+    function saveUserEdits() {
+      // Check edit permission
+      if (!checkUserPermission('canEdit')) {
+        return;
+      }
+      const userId = currentEditUserId;
+      const firstName = document.getElementById('editUserFirstName').value.trim();
+      const lastName = document.getElementById('editUserLastName').value.trim();
+      const role = $('#editUserRole').val();
+      const department = $('#editUserDepartment').val();
+      const joinDate = document.getElementById('editUserJoinDate').value;
+      const phone = document.getElementById('editUserPhone').value.trim();
+      const address = document.getElementById('editUserAddress').value.trim();
+      const status = document.getElementById('editUserStatus').value;
+      
+      // Validation
+      if (!firstName) {
+        alert('Please enter first name');
+        return;
+      }
+      
+      if (!lastName) {
+        alert('Please enter last name');
+        return;
+      }
+      
+      if (!role) {
+        alert('Please select a role');
+        return;
+      }
+      
+      const userData = {
+        id: userId,
+        firstName: firstName,
+        lastName: lastName,
+        role: role,
+        department: department || '',
+        joinDate: joinDate || '',
+        phone: phone || '',
+        address: address || '',
+        status: status || 'Active'
+      };
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideProcessing();
+          if (result && result.success) {
+            alert('User updated successfully');
+            closeEditUserModal();
+            // Refresh user list
+            loadUsers();
+          } else {
+            alert('Error: ' + (result ? result.message : 'Failed to update user'));
+          }
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error updating user:', error);
+          alert('Error updating user: ' + error.message);
+        })
+        .updateUser(sessionToken, userData);
+    }
+    
+    function saveQuickAddRole() {
+      // Check add permission
+      if (!checkUserPermission('canAdd')) {
+        return;
+      }
+      const newRole = document.getElementById('quickAddRole').value.trim();
+      
+      if (!newRole) {
+        alert('Please enter a role name');
+        return;
+      }
+      
+      // Check if role already exists locally
+      if (userRoles.includes(newRole)) {
+        alert('This role already exists');
+        return;
+      }
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideProcessing();
+          if (result && result.success) {
+            // Add to local array
+            userRoles.push(newRole);
+            
+            // Update both dropdowns
+            populateRoleDropdown('new');
+            populateRoleDropdown('edit');
+            
+            // Select the new role in the appropriate modal
+            if (quickAddMode === 'edit') {
+              $('#editUserRole').val(newRole).trigger('change');
+            } else {
+              $('#newUserRole').val(newRole).trigger('change');
+            }
+            
+            // Close modal
+            closeQuickAddRoleModal();
+            alert('New role added successfully');
+          } else {
+            alert('Error: ' + (result.message || 'Failed to add role'));
+          }
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error adding role:', error);
+          alert('Error adding role: ' + error.message);
+        })
+        .addNewRole(sessionToken, newRole);
+    }
+    
+    function saveQuickAddDept() {
+      // Check add permission
+      if (!checkUserPermission('canAdd')) {
+        return;
+      }
+      const newDept = document.getElementById('quickAddDepartment').value.trim();
+      
+      if (!newDept) {
+        alert('Please enter a department name');
+        return;
+      }
+      
+      // Check if department already exists locally
+      if (userDepartments.includes(newDept)) {
+        alert('This department already exists');
+        return;
+      }
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideProcessing();
+          if (result && result.success) {
+            // Add to local array
+            userDepartments.push(newDept);
+            
+            // Update both dropdowns
+            populateDepartmentDropdown('new');
+            populateDepartmentDropdown('edit');
+            
+            // Select the new department in the appropriate modal
+            if (quickAddMode === 'edit') {
+              $('#editUserDepartment').val(newDept).trigger('change');
+            } else {
+              $('#newUserDepartment').val(newDept).trigger('change');
+            }
+            
+            // Close modal
+            closeQuickAddDeptModal();
+            alert('New department added successfully');
+          } else {
+            alert('Error: ' + (result.message || 'Failed to add department'));
+          }
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error adding department:', error);
+          alert('Error adding department: ' + error.message);
+        })
+        .addNewDepartment(sessionToken, newDept);
+    }
+    
+    function sendPasswordReset(userId) {
+      // Check edit permission
+      if (!checkUserPermission('canEdit')) {
+        return;
+      }
+      
+      if (!confirm('Send password reset email to this user?')) return;
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideProcessing();
+          if (result && result.success) {
+            alert(result.message);
+          } else {
+            alert('Error: ' + (result ? result.message : 'Failed to send reset email'));
+          }
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error sending password reset:', error);
+          alert('Error: ' + error.message); // More generic error
+        })
+        .sendPasswordReset(sessionToken, userId); // Pass sessionToken first
+    }
+    
+    function deleteUser(userId) {
+      // Check delete permission
+      if (!checkUserPermission('canDelete')) {
+        return;
+      }
+      if (!confirm('Are you sure you want to delete this user?\n\nThis action cannot be undone.')) return;
+      
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideProcessing();
+          if (result === 'success') {
+            alert('User deleted successfully');
+            loadUsers();
+          } else if (result === 'self_error') {
+            alert('You cannot delete your own account');
+          } else if (result === 'not_found') {
+            alert('User not found');
+          } else {
+            alert('Error deleting user');
+          }
+        })
+        .withFailureHandler(function(error) {
+          hideProcessing();
+          console.error('Error deleting user:', error);
+          alert('Error deleting user: ' + error.message);
+        })
+        .deleteUser(sessionToken, userId, currentUserEmail);
+    }
+    
+    /* ==================== */
+    /* SEARCH FUNCTIONS */
+    /* ==================== */
+    function applySearch() {
+      const criteria = document.getElementById('searchCriteria').value;
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      
+      if (!query) {
+        filteredUsers = [...allUsers];
+      } else {
+        if (criteria === 'all') {
+          filteredUsers = allUsers.filter(user => {
+            return (
+              (user.email && user.email.toLowerCase().includes(query)) ||
+              (user.firstName && user.firstName.toLowerCase().includes(query)) ||
+              (user.lastName && user.lastName.toLowerCase().includes(query)) ||
+              (user.role && user.role.toLowerCase().includes(query)) ||
+              (user.department && user.department.toLowerCase().includes(query)) ||
+              (user.status && user.status.toLowerCase().includes(query))
+            );
+          });
+        } else {
+          filteredUsers = allUsers.filter(user => {
+            const fieldValue = user[criteria] ? user[criteria].toString().toLowerCase() : '';
+            return fieldValue.includes(query);
+          });
+        }
+      }
+      
+      currentPage = 1;
+      renderUsersTable();
+      
+      if (filteredUsers.length === 0) {
+        alert('No matching users found');
+      }
+    }
+    
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchCriteria').value = 'all';
+      filteredUsers = [...allUsers];
+      currentPage = 1;
+      renderUsersTable();
+    }
+    
+    function refreshUsersList() {
+      loadUsers();
+      loadRoles();
+      loadDepartments();
+    }
+    
+    /* ==================== */
+    /* UTILITY FUNCTIONS */
+    /* ==================== */
+    function showProcessing() {
+      document.getElementById('processingOverlay').style.display = 'flex';
+    }
+    
+    function hideProcessing() {
+      document.getElementById('processingOverlay').style.display = 'none';
+    }
+    
+    function isValidEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    function formatDateForDisplay(dateString) {
+      if (!dateString) return '';
+      
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString;
+        
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${year}-${month}-${day}`;
+      } catch (e) {
+        return dateString;
+      }
+    }
+    
+    // We need to add the missing functions to Template.gs
+    // Add these functions to Template.gs:
+    /*
+    function addNewRole(roleName) {
+      try {
+        const db = new Database();
+        const roles = db.getAllRoles();
+        
+        // Check if role already exists
+        if (roles.some(role => role.RoleName === roleName)) {
+          return { success: false, message: 'Role already exists' };
+        }
+        
+        // Generate new role ID
+        const newRoleId = 'ROLE' + (roles.length + 1).toString().padStart(3, '0');
+        
+        const roleData = {
+          RoleID: newRoleId,
+          RoleName: roleName,
+          Description: ""
+        };
+        
+        db.insert("Roles", roleData);
+        return { success: true, message: 'Role added successfully' };
+      } catch (error) {
+        console.error('Error adding role:', error);
+        return { success: false, message: 'Error adding role' };
+      }
+    }
+    
+    function addNewDepartment(deptName) {
+      try {
+        const db = new Database();
+        const departments = db.getAllDepartments();
+        
+        // Check if department already exists
+        if (departments.some(dept => dept.Department === deptName)) {
+          return { success: false, message: 'Department already exists' };
+        }
+        
+        // Generate new department ID
+        const newDeptId = 'DEPT' + (departments.length + 1).toString().padStart(3, '0');
+        
+        const deptData = {
+          DepartmentID: newDeptId,
+          Department: deptName,
+          Description: ""
+        };
+        
+        db.insert("Department", deptData);
+        return { success: true, message: 'Department added successfully' };
+      } catch (error) {
+        console.error('Error adding department:', error);
+        return { success: false, message: 'Error adding department' };
+      }
+    }
+    */
+  </script>
+</body>
+</html>

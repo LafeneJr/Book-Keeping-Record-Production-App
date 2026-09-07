@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payments Dashboard</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Poppins:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  
+  <!-- Select2 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+  
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+    }
+    
+    .payments-container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    
+    .payments-header {
+      margin-bottom: 25px;
+      flex-shrink: 0;
+    }
+    
+    .payments-header h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .payments-header p {
+      color: #7f8c8d;
+      font-size: 1.05rem;
+    }
+    
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #bdc3c7;
+      color: #34495e;
+    }
+    
+    .btn-outline:hover {
+      background-color: #ecf0f1;
+    }
+    
+    .search-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    
+    .search-select {
+      padding: 9px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      background-color: white;
+      flex-shrink: 0;
+    }
+    
+    .search-input {
+      padding: 10px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      width: 250px;
+      flex-shrink: 0;
+    }
+    
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+    
+    .payments-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1100px;
+    }
+    
+    .payments-table th {
+      background-color: #2c3e50;
+      color: white;
+      padding: 12px 15px;
+      text-align: left;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .payments-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ecf0f1;
+      color: #34495e;
+    }
+    
+    .payments-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 5px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    
+    .page-btn {
+      padding: 8px 12px;
+      background-color: white;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    
+    .page-btn.active {
+      background-color: #1abc9c;
+      color: white;
+      border-color: #1abc9c;
+    }
+    
+    .status-flag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .status-unpaid {
+      background-color: rgba(231, 76, 60, 0.15);
+      color: #e74c3c;
+    }
+    
+    .status-partial {
+      background-color: rgba(243, 156, 18, 0.15);
+      color: #f39c12;
+    }
+    
+    .status-paid {
+      background-color: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+    }
+    
+    .action-cell {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    
+    .action-btn {
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    
+    .edit-btn {
+      background-color: #3498db;
+      color: white;
+      border: none;
+    }
+    
+    .update-btn {
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+    }
+    
+    .cancel-btn {
+      background-color: #95a5a6;
+      color: white;
+      border: none;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      overflow-y: auto;
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 25px;
+      border-radius: 8px;
+      width: 500px;
+      max-width: 90%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .modal-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      color: #2c3e50;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    
+    .close-btn {
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #7f8c8d;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    .form-control:focus {
+      border-color: #1abc9c;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+    }
+    
+    .required:after {
+      content: " *";
+      color: #e74c3c;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .processing-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255,255,255,0.8);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #1abc9c;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .transaction-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .transaction-purchase {
+      background-color: rgba(52, 152, 219, 0.15);
+      color: #3498db;
+    }
+    
+    .transaction-sales {
+      background-color: rgba(155, 89, 182, 0.15);
+      color: #9b59b6;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .form-col {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="payments-container">
+    <!-- Header Section -->
+    <div class="payments-header">
+      <h1>Payments Dashboard</h1>
+      <p>View and manage payment transactions from purchase and sales orders</p>
+    </div>
+    
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <div></div> <!-- Empty space for alignment -->
+      
+      <div class="search-group">
+        <select id="searchCriteria" class="search-select">
+          <option value="all">All</option>
+          <option value="Payment ID">Payment ID</option>
+          <option value="Transaction Type">Transaction Type</option>
+          <option value="Reference ID">Reference ID</option>
+          <option value="Party ID">Party ID</option>
+          <option value="Payment Mode">Payment Mode</option>
+          <option value="Status">Status</option>
+        </select>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search payments...">
+        <button class="btn btn-outline" onclick="searchPayments()">
+          <i class="fas fa-search"></i> Search
+        </button>
+        <button class="btn btn-outline" onclick="clearSearch()">
+          <i class="fas fa-times"></i> Clear
+        </button>
+        <button class="btn btn-outline" onclick="refreshData()">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+    </div>
+    
+    <!-- Payments Table Container -->
+    <div id="tableContainer">
+      <div class="table-container">
+        <table class="payments-table">
+          <thead>
+            <tr>
+              <th width="10%">Date</th>
+              <th width="10%">Payment ID</th>
+              <th width="12%">Transaction Type</th>
+              <th width="12%">Reference ID</th>
+              <th width="10%">Party ID</th>
+              <th width="10%">Payment Mode</th>
+              <th width="10%">Amount</th>
+              <th width="8%">Status</th>
+              <th width="8%">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="pagination" id="pagination">
+        <!-- Pagination buttons will be added here -->
+      </div>
+    </div>
+    
+    <!-- No Data Message -->
+    <div id="noData" style="display:none; text-align:center; padding:40px; background:white; border-radius:8px;">
+      <i class="fas fa-inbox" style="font-size:3rem; color:#bdc3c7; margin-bottom:20px;"></i>
+      <h3 style="color:#7f8c8d;">No payment records found</h3>
+      <p>Payment data will appear here when purchase or sales orders are processed</p>
+    </div>
+  </div>
+  
+  <!-- Edit Payment Modal -->
+  <div id="editPaymentModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Payment Transaction</h2>
+        <span class="close-btn" onclick="closeEditModal()">&times;</span>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Payment ID</label>
+        <input type="text" id="editPaymentId" class="form-control" readonly>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-col">
+          <div class="form-group">
+            <label class="required">Date</label>
+            <input type="date" id="editDate" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-col">
+          <div class="form-group">
+            <label class="required">Transaction Type</label>
+            <select id="editTransactionType" class="form-control" required>
+              <option value="Purchase">Purchase</option>
+              <option value="Sales">Sales</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Reference ID</label>
+        <input type="text" id="editReferenceId" class="form-control" required>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-col">
+          <div class="form-group">
+            <label class="required">Party ID</label>
+            <input type="text" id="editPartyId" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-col">
+          <div class="form-group">
+            <label class="required">Payment Mode</label>
+            <select id="editPaymentMode" class="form-control" style="width:100%"></select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-col">
+          <div class="form-group">
+            <label class="required">Amount</label>
+            <input type="number" id="editAmount" class="form-control" min="0" step="0.01" required>
+          </div>
+        </div>
+        <div class="form-col">
+          <div class="form-group">
+            <label class="required">Status</label>
+            <select id="editStatus" class="form-control" required>
+              <option value="Unpaid">Unpaid</option>
+              <option value="Partial">Partial</option>
+              <option value="Paid">Paid</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="updatePayment()">Update Payment</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Processing Overlay -->
+  <div id="processingOverlay" class="processing-overlay">
+    <div class="spinner"></div>
+    <p>Loading payment data...</p>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script>
+    // ===========================================
+    // PERMISSION VARIABLES AND SETUP
+    // ===========================================
+
+    // Get permissions from window object (set by Template.html)
+    const paymentsPermissions = window.appPermissions?.payments || {
+        canView: true,
+        canEdit: true
+        // Note: Payments typically doesn't have add/delete permissions as payments
+        // are generated from purchases/sales, not manually added
+    };
+
+    const sessionToken = window.appPermissions?.token || '';
+    
+    console.log('Payments Permissions:', paymentsPermissions);
+
+    // Client-side permission check function
+    function checkPaymentsPermissionClient(action) {
+        if (!paymentsPermissions[action]) {
+            const actionText = action.replace('can', '').toLowerCase();
+            alert(`You do not have permission to ${actionText} payment records.`);
+            return false;
+        }
+        return true;
+    }
+
+    // ===========================================
+    // PAGE SETUP FUNCTION
+    // ===========================================
+    function setupPaymentsPagePermissions() {
+        console.log('Setting up payments page with permissions:', paymentsPermissions);
+        
+        // Only load data if user has view permission
+        if (!paymentsPermissions.canView) {
+            document.getElementById('tableContainer').style.display = 'none';
+            document.getElementById('noData').style.display = 'block';
+            document.getElementById('noData').innerHTML = `
+                <i class="fas fa-ban" style="font-size:3rem; color:#e74c3c; margin-bottom:20px;"></i>
+                <h3 style="color:#e74c3c;">Access Denied</h3>
+                <p>You don't have permission to view payment records.</p>
+            `;
+            
+            // Hide action buttons
+            document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            
+            return false;
+        }
+        
+        // Hide edit buttons if no edit permission
+        if (!paymentsPermissions.canEdit) {
+            // We'll handle this when rendering the table
+        }
+        
+        return true;
+    }
+
+    // ===========================================
+    // EXISTING GLOBAL VARIABLES
+    // ===========================================
+    let currentPage = 1;
+    const pageSize = 25;
+    let allPayments = [];
+    let filteredPayments = [];
+    let paymentModes = [];
+    let currentEditingPayment = null;
+    
+    // ===========================================
+    // INITIALIZATION (UPDATED FOR PERMISSIONS)
+    // ===========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Payments page initializing...');
+        
+        // Setup page based on permissions
+        if (!setupPaymentsPagePermissions()) {
+            console.log('User does not have view permission for payment records');
+            return;
+        }
+        
+        // Only load data if user has view permission
+        if (paymentsPermissions.canView) {
+            loadPaymentModes();
+            loadPayments();
+            
+            // Initialize payment mode dropdown
+            $('#editPaymentMode').select2({
+                placeholder: "Select Payment Mode",
+                allowClear: true
+            });
+        }
+    });
+    
+    // ===========================================
+    // DATA LOADING FUNCTIONS (UPDATED WITH PERMISSIONS)
+    // ===========================================
+    
+    // Load payment modes
+    function loadPaymentModes() {
+        // Check view permission
+        if (!checkPaymentsPermissionClient('canView')) {
+            return;
+        }
+        
+        google.script.run
+            .withSuccessHandler(function(result) {
+                paymentModes = result;
+                populatePaymentModeDropdown();
+            })
+            .withFailureHandler(function(error) {
+                console.error('Error loading payment modes:', error);
+                alert('Error loading payment modes: ' + error.message);
+            })
+            .ptGetDimensions(sessionToken); // Updated to pass session token
+    }
+    
+    // Populate payment mode dropdown
+    function populatePaymentModeDropdown() {
+        const modeSelect = $('#editPaymentMode');
+        modeSelect.empty();
+        modeSelect.append(new Option('', ''));
+        
+        // Debug: Check what data we have
+        console.log('Payment modes data:', paymentModes);
+        
+        // Extract payment modes from the data
+        // Try different possible column names
+        let modes = [];
+        
+        if (paymentModes && paymentModes.length > 0) {
+            // Try to find payment mode column - check for common column names
+            const firstItem = paymentModes[0];
+            const possibleColumnNames = ['PMT Mode', 'Payment Mode', 'PaymentMethod', 'Mode', 'Payment_Mode'];
+            
+            for (const colName of possibleColumnNames) {
+                if (firstItem[colName] !== undefined) {
+                    console.log(`Found payment modes in column: ${colName}`);
+                    // Get unique values from this column
+                    const columnValues = paymentModes
+                        .map(item => item[colName])
+                        .filter(value => value && value.trim() !== '');
+                    modes = [...new Set(columnValues)];
+                    break;
+                }
+            }
+            
+            // If still no modes, show all keys for debugging
+            if (modes.length === 0) {
+                console.log('Available columns in dimensions data:', Object.keys(firstItem));
+            }
+        }
+        
+        console.log('Available payment modes:', modes);
+        
+        // Add modes to dropdown
+        modes.forEach(mode => {
+            if (mode) {
+                modeSelect.append(new Option(mode, mode));
+            }
+        });
+        
+        modeSelect.trigger('change');
+    }
+    
+    // Load payments from sheet
+    function loadPayments() {
+        // Check view permission
+        if (!checkPaymentsPermissionClient('canView')) {
+            return;
+        }
+        
+        showProcessing();
+        google.script.run
+            .withSuccessHandler(function(result) {
+                allPayments = result;
+                filteredPayments = [...result];
+                renderPaymentsTable();
+                hideProcessing();
+            })
+            .withFailureHandler(function(error) {
+                console.error('Error loading payments:', error);
+                alert('Error loading payments: ' + error.message);
+                allPayments = [];
+                filteredPayments = [];
+                renderPaymentsTable();
+                hideProcessing();
+            })
+            .ptGetAllPayments(sessionToken); // Updated to pass session token
+    }
+    
+    // Render payments table with pagination
+    function renderPaymentsTable() {
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const pagePayments = filteredPayments.slice(startIndex, endIndex);
+        const tableBody = document.getElementById('tableBody');
+        
+        tableBody.innerHTML = '';
+        
+        if (pagePayments.length === 0) {
+            document.getElementById('tableContainer').style.display = 'none';
+            document.getElementById('noData').style.display = 'block';
+            document.getElementById('pagination').innerHTML = '';
+            return;
+        }
+        
+        document.getElementById('tableContainer').style.display = 'block';
+        document.getElementById('noData').style.display = 'none';
+        
+        pagePayments.forEach((payment) => {
+            const row = document.createElement('tr');
+            
+            // Get the EXACT status from the sheet
+            const statusFromSheet = payment.Status || '';
+            
+            // Apply color based on the exact status value
+            let statusClass = '';
+            if (statusFromSheet === 'Unpaid') {
+                statusClass = 'status-unpaid';
+            } else if (statusFromSheet === 'Partial') {
+                statusClass = 'status-partial';
+            } else if (statusFromSheet === 'Paid') {
+                statusClass = 'status-paid';
+            }
+            
+            // Determine transaction type badge
+            let transactionClass = 'transaction-purchase';
+            let transactionText = payment['Transaction Type'] || 'Purchase';
+            if (transactionText.toLowerCase().includes('sales')) {
+                transactionClass = 'transaction-sales';
+            }
+            
+            // Create action buttons based on permissions
+            let actionButtons = '';
+            
+            if (paymentsPermissions.canEdit) {
+                actionButtons = `
+                    <button class="action-btn edit-btn" onclick="openEditModal('${payment['Payment ID']}')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>`;
+            }
+            
+            row.innerHTML = `
+                <td>${payment.Date || ''}</td>
+                <td>${payment['Payment ID'] || ''}</td>
+                <td>
+                    <span class="transaction-badge ${transactionClass}">
+                        ${transactionText}
+                    </span>
+                </td>
+                <td>${payment['Reference ID'] || ''}</td>
+                <td>${payment['Party ID'] || ''}</td>
+                <td>${payment['Payment Mode'] || ''}</td>
+                <td>${formatAmount(payment.Amount || 0)}</td>
+                <td>
+                    <span class="status-flag ${statusClass}">
+                        ${statusFromSheet}
+                    </span>
+                </td>
+                <td class="action-cell">
+                    ${actionButtons}
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+        
+        // Render pagination
+        renderPagination();
+    }
+    
+    // Format amount (no currency sign)
+    function formatAmount(amount) {
+        return parseFloat(amount || 0).toFixed(2);
+    }
+    
+    // Render pagination controls
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredPayments.length / pageSize);
+        const paginationDiv = document.getElementById('pagination');
+        paginationDiv.innerHTML = '';
+        
+        if (totalPages <= 1) return;
+        
+        // Previous button
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'page-btn';
+        prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPaymentsTable();
+            }
+        };
+        paginationDiv.appendChild(prevBtn);
+        
+        // Page buttons
+        for (let i = 1; i <= totalPages; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+            pageBtn.textContent = i;
+            pageBtn.onclick = () => {
+                currentPage = i;
+                renderPaymentsTable();
+            };
+            paginationDiv.appendChild(pageBtn);
+        }
+        
+        // Next button
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'page-btn';
+        nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPaymentsTable();
+            }
+        };
+        paginationDiv.appendChild(nextBtn);
+    }
+        
+    // Open edit modal
+      function openEditModal(paymentId) {
+          // Check edit permission
+          if (!checkPaymentsPermissionClient('canEdit')) {
+              return;
+          }
+          
+          const payment = allPayments.find(p => p['Payment ID'] === paymentId);
+          if (!payment) {
+              alert('Payment not found');
+              return;
+          }
+          
+          currentEditingPayment = payment;
+          
+          // Populate form fields
+          document.getElementById('editPaymentId').value = payment['Payment ID'] || '';
+          document.getElementById('editDate').value = formatDateForInput(payment.Date) || '';
+          
+          // Set Transaction Type - FIXED
+          const transactionType = payment['Transaction Type'] || 'Purchase';
+          const transactionTypeSelect = document.getElementById('editTransactionType');
+          
+          // Find and select the option that matches the payment's transaction type
+          for (let i = 0; i < transactionTypeSelect.options.length; i++) {
+              if (transactionTypeSelect.options[i].value === transactionType) {
+                  transactionTypeSelect.selectedIndex = i;
+                  break;
+              }
+          }
+          
+          // If the value doesn't exist in options, add it
+          let optionExists = false;
+          for (let i = 0; i < transactionTypeSelect.options.length; i++) {
+              if (transactionTypeSelect.options[i].value === transactionType) {
+                  optionExists = true;
+                  break;
+              }
+          }
+          
+          if (!optionExists && transactionType) {
+              // Add the value as a new option
+              const newOption = document.createElement('option');
+              newOption.value = transactionType;
+              newOption.textContent = transactionType;
+              transactionTypeSelect.appendChild(newOption);
+              transactionTypeSelect.value = transactionType;
+          }
+          
+          document.getElementById('editReferenceId').value = payment['Reference ID'] || '';
+          document.getElementById('editPartyId').value = payment['Party ID'] || '';
+          document.getElementById('editAmount').value = payment.Amount || 0;
+          
+          // Set Status - FIXED
+          const status = payment.Status || 'Unpaid';
+          const statusSelect = document.getElementById('editStatus');
+          statusSelect.value = status;
+          
+          // Set payment mode
+          const paymentMode = payment['Payment Mode'] || '';
+          if (paymentMode) {
+              $('#editPaymentMode').val(paymentMode).trigger('change');
+              
+              // Ensure the value exists in the dropdown
+              setTimeout(() => {
+                  const modeSelect = $('#editPaymentMode');
+                  const currentValue = modeSelect.val();
+                  
+                  if (!currentValue || currentValue.length === 0) {
+                      // Value doesn't exist, add it
+                      modeSelect.append(new Option(paymentMode, paymentMode));
+                      modeSelect.val(paymentMode).trigger('change');
+                  }
+              }, 100);
+          }
+          
+          // Show modal
+          document.getElementById('editPaymentModal').style.display = 'block';
+      }
+    
+    // Format date for input field (YYYY-MM-DD)
+    function formatDateForInput(dateString) {
+        if (!dateString) return '';
+        
+        // If date is already in YYYY-MM-DD format, return as is
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+            return dateString;
+        }
+        
+        // Try to parse other date formats
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '';
+        
+        return date.toISOString().split('T')[0];
+    }
+    
+    // Close edit modal
+    function closeEditModal() {
+        document.getElementById('editPaymentModal').style.display = 'none';
+        currentEditingPayment = null;
+    }
+    
+    // Update payment
+    function updatePayment() {
+        // Check edit permission
+        if (!checkPaymentsPermissionClient('canEdit')) {
+            return;
+        }
+        
+        const updatedPayment = {
+            'Payment ID': document.getElementById('editPaymentId').value,
+            'Date': document.getElementById('editDate').value,
+            'Transaction Type': document.getElementById('editTransactionType').value,
+            'Reference ID': document.getElementById('editReferenceId').value,
+            'Party ID': document.getElementById('editPartyId').value,
+            'Payment Mode': $('#editPaymentMode').val(),
+            'Amount': parseFloat(document.getElementById('editAmount').value) || 0,
+            'Status': document.getElementById('editStatus').value
+        };
+        
+        // Validate required fields
+        if (!updatedPayment['Date']) {
+            alert('Please select Date');
+            return;
+        }
+
+        if (!updatedPayment['Transaction Type']) { 
+            alert('Please select Transaction Type');
+            return;
+        }
+
+        if (!updatedPayment['Reference ID']) {
+            alert('Please enter Reference ID');
+            return;
+        }
+
+        if (!updatedPayment['Party ID']) {
+            alert('Please enter Party ID');
+            return;
+        }
+
+        if (!updatedPayment['Payment Mode']) {
+            alert('Please select Payment Mode');
+            return;
+        }
+
+        if (!updatedPayment['Amount'] || updatedPayment['Amount'] <= 0) {
+            alert('Please enter a valid Amount');
+            return;
+        }
+
+        if (!updatedPayment['Status']) {
+            alert('Please select Status');
+            return;
+        }
+        
+        showProcessing();
+        google.script.run
+            .withSuccessHandler(function() {
+                hideProcessing();
+                alert('Payment updated successfully');
+                closeEditModal();
+                loadPayments(); // Refresh the table
+            })
+            .withFailureHandler(function(error) {
+                hideProcessing();
+                console.error('Error updating payment:', error);
+                alert('Error: ' + error.message);
+            })
+            .ptUpdatePayment(sessionToken, updatedPayment); // Updated to pass session token
+    }
+    
+    // Search payments
+    function searchPayments() {
+        // Check view permission (searching is a view operation)
+        if (!checkPaymentsPermissionClient('canView')) {
+            return;
+        }
+        
+        const criteria = document.getElementById('searchCriteria').value;
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        
+        if (!query) {
+            filteredPayments = [...allPayments];
+        } else {
+            filteredPayments = allPayments.filter(payment => {
+                if (criteria === 'all') {
+                    return (
+                        (payment['Payment ID'] && payment['Payment ID'].toLowerCase().includes(query)) ||
+                        (payment['Transaction Type'] && payment['Transaction Type'].toLowerCase().includes(query)) ||
+                        (payment['Reference ID'] && payment['Reference ID'].toLowerCase().includes(query)) ||
+                        (payment['Party ID'] && payment['Party ID'].toLowerCase().includes(query)) ||
+                        (payment['Payment Mode'] && payment['Payment Mode'].toLowerCase().includes(query)) ||
+                        (payment['Status'] && payment['Status'].toLowerCase().includes(query))
+                    );
+                } else {
+                    const fieldValue = payment[criteria] || '';
+                    return fieldValue.toLowerCase().includes(query);
+                }
+            });
+        }
+        
+        currentPage = 1;
+        renderPaymentsTable();
+        
+        if (filteredPayments.length === 0) {
+            alert('No matching payments found');
+        }
+    }
+    
+    // Clear search
+    function clearSearch() {
+        // Check view permission
+        if (!checkPaymentsPermissionClient('canView')) {
+            return;
+        }
+        
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchCriteria').value = 'all';
+        filteredPayments = [...allPayments];
+        currentPage = 1;
+        renderPaymentsTable();
+    }
+    
+    // Refresh data
+    function refreshData() {
+        // Check view permission
+        if (!checkPaymentsPermissionClient('canView')) {
+            return;
+        }
+        
+        loadPayments();
+    }
+    
+    // Show processing overlay
+    function showProcessing() {
+        document.getElementById('processingOverlay').style.display = 'flex';
+    }
+    
+    // Hide processing overlay
+    function hideProcessing() {
+        document.getElementById('processingOverlay').style.display = 'none';
+    }
+</script>
+</body>
+</html>
